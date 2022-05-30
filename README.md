@@ -13,9 +13,6 @@ If you have an interesting piece of code, a better explanation, a topic which is
 ## :camera_flash: Screenshots
 <img src="/screenshots/screenshot_1.png" width="260">&emsp;<img src="/screenshots/screenshot_2.png" width="260">
 
-## :clapper: Video
-<img src="/screenshots/movie.gif" width="260">
-
 ## :pushpin: Developer notes
 not yet
 
