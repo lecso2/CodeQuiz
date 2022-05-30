@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <style name="Type1Button">
+        <item name="android:textColor">@color/white</item>
+        <item name="android:background">@color/primary</item>
+        <item name="fontFamily">@font/poppins_medium</item>
+    </style>
+
+    <style name="Type2Button">
+        <item name="android:background">@drawable/background_yellow_square_white_frame</item>
+        <item name="android:textColor">@color/primary</item>
+        <item name="fontFamily">@font/poppins_medium</item>
+    </style>
+
+    <style name="Tag">
+        <item name="android:background">@color/primary</item>
+        <item name="android:textColor">@color/secondary</item>
+    </style>
+
+</resources>

@@ -1,0 +1,91 @@
+{
+  "puzzles": [
+    {
+      "id": 1,
+      "title": "What will be the type of x?",
+      "code": " val x = CoroutineScope(EmptyCoroutineContext).launch {\n        }",
+      "answers": [
+        "CoroutineScope",
+        "Job",
+        "CoroutineContext",
+        "Deferred"
+      ],
+      "correctAnswerNumber": 1,
+      "explanation": "Coroutine job is created with launch coroutine builder. It runs a specified block of code",
+      "tags": [
+        "builders"
+      ]
+    },
+    {
+      "id": 2,
+      "title": "How many states a job have?",
+      "code": "",
+      "answers": [
+        "5",
+        "6",
+        "7",
+        "8",
+        "9"
+      ],
+      "correctAnswerNumber": 1,
+      "explanation": "New\nActive\nCompleting\nCompleted\nCancelling\nCancelled",
+      "tags": [
+        "builders"
+      ]
+    },
+    {
+      "id": 3,
+      "title": "What will be the type of x?",
+      "code": "val x = CoroutineScope(EmptyCoroutineContext).async {\n        }",
+      "answers": [
+        "CoroutineScope",
+        "Job",
+        "CoroutineContext",
+        "Deferred"
+      ],
+      "correctAnswerNumber": 3,
+      "explanation": "Deferred value is a non-blocking cancellable future — it is a Job with a result. It has an await method which awaits for completion of this value without blocking a thread and resumes when deferred computation is complete, returning the resulting value or throwing the corresponding exception if the deferred was cancelled.",
+      "tags": [
+        "builders"
+      ]
+    },
+    {
+      "id": 4,
+      "title": "What will this code print out?",
+      "code": "fun main() {\n\nrunBlocking {\nCoroutineScope(EmptyCoroutineContext).async {\n            delay(1000)\n            println(\"async\")\n        }\nCoroutineScope(EmptyCoroutineContext).launch {\n            delay(2000)\n            println(\"launch\")\n        }\nwithContext(EmptyCoroutineContext) {\n            println(\"withContext\")\n        }\n    }\n    println(\"end\")\n}",
+      "answers": [
+        "async\nend",
+        "launch\nend",
+        "withContext\nend",
+        "async\nlaunch\nend",
+        "async\nwithContext\nend",
+        "launch\nwithContext\nend",
+        "async\nlaunch\nwithContext\nend",
+        "end"
+      ],
+      "correctAnswerNumber": 2,
+      "explanation": "These are coroutine Builders.\n\nrunBlocking: Runs a new coroutine and blocks the current thread interruptibly until its completion. This function should not be used from a coroutine. It is designed to bridge regular blocking code to libraries that are written in suspending style, to be used in main functions and in tests.\nSo, this will wait until the blocking or suspending code runs, but won't wait for anything else.\n\nasync: Creates a coroutine and returns it's future result as an implementation of [Deferred]. It is not blocking, not suspending, but you can call await() on it's result to suspend the code till it returns.\nSince no await() or join() is called, the code won't wait until it runs.\n\nlaunch: Launches a new coroutine without blocking the current thread and returns a reference to the coroutine as a [Job]. \nIt is not blocking, not suspending, so the code won't wait until it runs.\n\nwithContext: Calls the specified suspending block with a given coroutine context, suspends until it completes, and returns the result. Should be called only from a coroutine or a suspend function.\nIt is suspending, so the code will wait until it runs.",
+      "tags": [
+        "builders"
+      ]
+    },
+    {
+      "id": 5,
+      "title": "Which one of these statements is true?",
+      "code": "A) all builders are extension functions on CoroutineScope\nB) withContext(){} suspends the current coroutine until it completes\nC) runBlocking{} is advised in production code\nD) launch{} is blocking the current thread",
+      "answers": [
+        "none",
+        "all",
+        "A",
+        "B",
+        "C",
+        "D"
+      ],
+      "correctAnswerNumber": 3,
+      "explanation": "withContext() {}\n    It is a suspending method which needs a CoroutineScope as parameter. Because it is suspending, the current coroutine will be blocked until it finishes, thus it needs to be called from a CoroutineScope.\n    This method is used to change the context from the current scope, like change Dispatcher.\n\n    runBlocking {}\n    Runs a new coroutine and blocks completion until all of it's child coroutines are completed. This function should not be used from a coroutine. It is designed to bridge regular blocking code to libraries that are written in suspending style, to be used in main functions and in tests.\n\n    launch{}\n    This is an extension function of the CoroutineScope, so it can be called only in a scope. Launches a new coroutine without blocking the current thread and returns a reference to the coroutine as a Job.\n\n    asyn{}\n    This is an extension function of the CoroutineScope, so it can be called only in a scope. Creates a coroutine and returns its future result as an implementation of Deferred.",
+      "tags": [
+        "builders"
+      ]
+    }
+  ]
+}

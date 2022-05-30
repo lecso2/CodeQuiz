@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <attr name="Type1Button" format="reference"/>
+    <attr name="Type2Button" format="reference"/>
+
+
+</resources>

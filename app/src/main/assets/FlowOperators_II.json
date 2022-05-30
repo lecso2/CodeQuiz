@@ -1,0 +1,333 @@
+{
+  "puzzles": [
+    {
+      "id": 12,
+      "title": "What will be the output when you run this code (approximately) ?",
+      "code": "fun main() = runBlocking {\n\n    val nums = (1..3).asFlow().onEach { delay(300) }\n    val strs = flowOf(\"one\", \"two\", \"three\").onEach { delay(400) }\n    val startTime = System.currentTimeMillis()\n\n    nums.zip(strs) { a, b -> \"$a -> $b\" }\n        .collect { value ->  \n            println(\"$value at ${System.currentTimeMillis() - startTime} ms from start\")\n        }\n}",
+      "answers": [
+        "Compilation error",
+        "Runtime error",
+        "1 -> one at 700 ms from start\n2 -> two at 1400 ms from start\n3 -> three at 2100 ms from start",
+        "1 -> one at 400 ms from start\n2 -> two at 800 ms from start\n3 -> three at 1200 ms from start",
+        "1 -> one at 400 ms from start\n2 -> one at 600 ms from start\n2 -> two at 800 ms from start\n3 -> two at 900 ms from start\n3 -> three at 1200 ms from start",
+        "1 -> one at 700 ms from start\n2 -> one at 1000 ms from start\n2 -> two at 1400 ms from start\n3 -> two at 1700 ms from start\n3 -> three at 2100 ms from start"
+      ],
+      "correctAnswerNumber": 3,
+      "explanation": "Zip operator combines the corresponding values of two flows. The upstream flow is collected sequentially in the same coroutine without any buffering, while the other flow is collected concurrently as if buffer(0) is used.",
+      "tags": [
+        "flow operators II"
+      ],
+      "comment:": "composing multiple flows, zip"
+    },
+    {
+      "id": 13,
+      "title": "What will be the output when you run this code (approximately) ?",
+      "code": "fun main() = runBlocking {\n\n    val nums = (1..3).asFlow().onEach { delay(300) } \n    val strs = flowOf(\"one\", \"two\", \"three\").onEach { delay(400) }         \n    val startTime = System.currentTimeMillis() \n    \n    nums.combine(strs) { a, b -> \"$a -> $b\" } \n        .collect { value ->  \n            println(\"$value at ${System.currentTimeMillis() - startTime} ms from start\")\n        }\n}",
+      "answers": [
+        "Compilation error",
+        "Runtime error",
+        "1 -> one at 700 ms from start\n2 -> two at 1400 ms from start\n3 -> three at 2100 ms from start",
+        "1 -> one at 400 ms from start\n2 -> two at 800 ms from start\n3 -> three at 1200 ms from start",
+        "1 -> one at 400 ms from start\n2 -> one at 600 ms from start\n2 -> two at 800 ms from start\n3 -> two at 900 ms from start\n3 -> three at 1200 ms from start",
+        "1 -> one at 700 ms from start\n2 -> one at 1000 ms from start\n2 -> two at 1400 ms from start\n3 -> two at 1700 ms from start\n3 -> three at 2100 ms from start"
+      ],
+      "correctAnswerNumber": 4,
+      "explanation": "Combine{} returns a Flow whose values are generated with transform function by combining the most recently emitted values by each flow.",
+      "tags": [
+        "flow operators II"
+      ],
+      "comment:": "composing multiple flows, combine"
+    },
+    {
+      "id": 14,
+      "title": "What will be the output when you run this code (approximately) ?",
+      "code": "fun main() = runBlocking {\n    val startTime = System.currentTimeMillis()\n\n    (1..3).asFlow().onEach { delay(100) }\n        .flatMapConcat { requestFlow(it) }\n        .collect { value -> print(value, startTime) }\n}\n\nfun requestFlow(i: Int): Flow<String> = flow {\n    emit(\"$i: First\")\n    delay(500)\n    emit(\"$i: Second\")\n}\n\nfun print(value: String, startTime: Long) {\n    println(\"$value at ${System.currentTimeMillis() - startTime} ms from start\")\n}",
+      "answers": [
+        "1: First at 100 ms from start\n1: Second at 600 ms from start\n2: First at 700 ms from start\n2: Second at 1200 ms from start\n3: First at 1300 ms from start\n3: Second at 1800 ms from start",
+        "1: First at 100 ms from start\n2: First at 700 ms from start\n3: First at 1300 ms from start\n1: Second at 600 ms from start\n2: Second at 1200 ms from start\n3: Second at 1800 ms from start",
+        "1: First at 100 ms from start\n2: First at 700 ms from start\n3: First at 1300 ms from start\n3: Second at 1800 ms from start",
+        "1: First at 100 ms from start\n2: First at 200 ms from start\n3: First at 300 ms from start\n1: Second at 600 ms from start\n2: Second at 700 ms from start\n3: Second at 800 ms from start",
+        "Compilation error",
+        "Runtime error"
+      ],
+      "correctAnswerNumber": 0,
+      "explanation": "flatMapConcat and flattenConcat flattens the flows by concatenating them. They are the most direct analogues of the corresponding sequence operators. They wait for the inner flow to complete before starting to collect the next. The sequential nature of flatMapConcat is obvious.",
+      "tags": [
+        "flow operators II"
+      ],
+      "comment:": "flattening, flatMapConcat"
+    },
+    {
+      "id": 15,
+      "title": "What will be the output when you run this code (approximately) ?",
+      "code": "fun main() = runBlocking {\n    val startTime = System.currentTimeMillis()\n\n    (1..3).asFlow().onEach { delay(100) }\n        .flatMapMerge { requestFlow(it) }\n        .collect { value -> print(value, startTime) }\n}\n\nfun requestFlow(i: Int): Flow<String> = flow {\n    emit(\"$i: First\")\n    delay(500)\n    emit(\"$i: Second\")\n}\n\nfun print(value: String, startTime: Long) {\n    println(\"$value at ${System.currentTimeMillis() - startTime} ms from start\")\n}",
+      "answers": [
+        "1: First at 100 ms from start\n1: Second at 600 ms from start\n2: First at 700 ms from start\n2: Second at 1200 ms from start\n3: First at 1300 ms from start\n3: Second at 1800 ms from start",
+        "1: First at 100 ms from start\n2: First at 700 ms from start\n3: First at 1300 ms from start\n1: Second at 600 ms from start\n2: Second at 1200 ms from start\n3: Second at 1800 ms from start",
+        "1: First at 100 ms from start\n2: First at 200 ms from start\n3: First at 300 ms from start\n3: Second at 800 ms from start",
+        "1: First at 100 ms from start\n2: First at 200 ms from start\n3: First at 300 ms from start\n1: Second at 600 ms from start\n2: Second at 700 ms from start\n3: Second at 800 ms from start",
+        "Compilation error",
+        "Runtime error"
+      ],
+      "correctAnswerNumber": 3,
+      "explanation": "flatMapMerge{} and flattenMerge{} are both operators that concurrently collect all the incoming flows and merge their values into a single flow so that values are emitted as soon as possible. They both accept an optional concurrency parameter that limits the number of concurrent flows that are collected at the same time (it is equal to DEFAULT_CONCURRENCY by default). The concurrent nature of flatMapMerge is obvious.\n\n Note that the flatMapMerge calls its block of code ({ requestFlow(it) } in this example) sequentially, but collects the resulting flows concurrently, it is the equivalent of performing a sequential map { requestFlow(it) } first and then calling flattenMerge on the result.",
+      "tags": [
+        "flow operators II"
+      ],
+      "comment:": "flattening, flatMapMerge"
+    },
+    {
+      "id": 16,
+      "title": "What will be the output when you run this code (approximately) ?",
+      "code": "fun main() = runBlocking {\n    val startTime = System.currentTimeMillis()\n\n    (1..3).asFlow().onEach { delay(100) }\n        .flatMapMerge(1) { requestFlow(it) }\n        .collect { value -> print(value, startTime) }\n}\n\nfun requestFlow(i: Int): Flow<String> = flow {\n    emit(\"$i: First\")\n    delay(500)\n    emit(\"$i: Second\")\n}\n\nfun print(value: String, startTime: Long) {\n    println(\"$value at ${System.currentTimeMillis() - startTime} ms from start\")\n}",
+      "answers": [
+        "1: First at 100 ms from start\n1: Second at 600 ms from start\n2: First at 700 ms from start\n2: Second at 1200 ms from start\n3: First at 1300 ms from start\n3: Second at 1800 ms from start",
+        "1: First at 100 ms from start\n2: First at 700 ms from start\n3: First at 1300 ms from start\n1: Second at 600 ms from start\n2: Second at 1200 ms from start\n3: Second at 1800 ms from start",
+        "1: First at 100 ms from start\n2: First at 200 ms from start\n3: First at 300 ms from start\n3: Second at 800 ms from start",
+        "1: First at 100 ms from start\n2: First at 200 ms from start\n3: First at 300 ms from start\n1: Second at 600 ms from start\n2: Second at 700 ms from start\n3: Second at 800 ms from start",
+        "Compilation error",
+        "Runtime error"
+      ],
+      "correctAnswerNumber": 0,
+      "explanation": "Note that the default concurrency was set to 1. \nflatMapMerge{} and flattenMerge{} are both operators that concurrently collect all the incoming flows and merge their values into a single flow so that values are emitted as soon as possible. They both accept an optional concurrency parameter that limits the number of concurrent flows that are collected at the same time (it is equal to DEFAULT_CONCURRENCY by default).",
+      "tags": [
+        "flow operators II"
+      ],
+      "comment:": "flattening,  flatMapMerge(1)"
+    },
+    {
+      "id": 17,
+      "title": "What will be the output when you run this code (approximately) ?",
+      "code": "fun main() = runBlocking {\n    val startTime = System.currentTimeMillis()\n    (1..3).asFlow().onEach { delay(100) }\n        .flatMapLatest { requestFlow(it) }\n        .collect { value ->\n            print(value, startTime)\n        }\n}\n\nfun requestFlow(i: Int): Flow<String> = flow {\n    emit(\"$i: First\")\n    delay(500)\n    emit(\"$i: Second\")\n}\n\nfun print(value: String, startTime: Long) {\n    println(\"$value at ${System.currentTimeMillis() - startTime} ms from start\")\n}",
+      "answers": [
+        "1: First at 100 ms from start\n1: Second at 600 ms from start\n2: First at 700 ms from start\n2: Second at 1200 ms from start\n3: First at 1300 ms from start\n3: Second at 1800 ms from start",
+        "1: First at 100 ms from start\n2: First at 700 ms from start\n3: First at 1300 ms from start\n1: Second at 600 ms from start\n2: Second at 1200 ms from start\n3: Second at 1800 ms from start",
+        "1: First at 100 ms from start\n2: First at 200 ms from start\n3: First at 300 ms from start\n3: Second at 800 ms from start",
+        "1: First at 100 ms from start\n2: First at 200 ms from start\n3: First at 300 ms from start\n1: Second at 600 ms from start\n2: Second at 700 ms from start\n3: Second at 800 ms from start",
+        "Compilation error",
+        "Runtime error"
+      ],
+      "correctAnswerNumber": 2,
+      "explanation": "In flatMapLatest{} flattening mode the previous flow is cancelled as soon as new flow is emitted. \n\nNote that flatMapLatest cancels all the code in its block ({ requestFlow(it) } in this example) on a new value. It makes no difference in this particular example, because the call to requestFlow itself is fast, not-suspending, and cannot be cancelled. However, it would show up if we were to use suspending functions like delay in there.",
+      "tags": [
+        "flow operators II"
+      ],
+      "comment:": "flattening, flatMapLatest"
+    },
+    {
+      "id": 18,
+      "title": "What will be the output when you run this code?",
+      "code": "fun main() = runBlocking {\n    try {\n        simple().collect { value ->\n            println(value)\n            check(value <= 1) { \"Crashed on $value\" }\n        }\n    } catch (e: Throwable) {\n        println(\"Caught $e\")\n    }\n}\n\nfun simple(): Flow<Int> = flow {\n    for (i in 1..3) {\n        println(\"Emitting $i\")\n        emit(i)\n    }\n}",
+      "answers": [
+        "Emitting 1\n1\nEmitting 2\n2\nEmitting 3\n3\nCaught java.lang.IllegalStateException: Crashed on  3",
+        "Emitting 1\n1\nEmitting 2\n2\nCaught java.lang.IllegalStateException: Crashed on 2",
+        "Emitting 1\n1\nEmitting 2\nCaught java.lang.IllegalStateException: Crashed on 2",
+        "Emitting 1\nCollected 1\nEmitting 2\nCollected 2\nCaught java.lang.IllegalStateException: Crashed on  2",
+        "Emitting 1\n1\nEmitting 2\n2\nCaught java.lang.IllegalArgumentException: Crashed on  2"
+      ],
+      "correctAnswerNumber": 1,
+      "explanation": "A collector can use Kotlin's try/catch block to handle exceptions. This code successfully catches an exception in collect terminal operator and, as we see, no more values are emitted after that.",
+      "tags": [
+        "flow operators II"
+      ],
+      "comment:": "exceptions"
+    },
+    {
+      "id": 19,
+      "title": "What will be the output when you run this code?",
+      "code": "fun main() = runBlocking {\n    try {\n        simple().collect { value -> println(value) }\n    } catch (e: Throwable) {\n        println(\"Caught $e\")\n    }\n}\n\nfun simple(): Flow<String> =\n    flow {\n        for (i in 1..3) {\n            println(\"Emitting $i\")\n            emit(i)\n        }\n    }\n        .map { value ->\n            check(value <= 1) { \"Crashed on $value\" }\n            \"string $value\"\n        }",
+      "answers": [
+        "Emitting 1\n1\nEmitting 2\n2\nEmitting 3\n3\nCaught java.lang.IllegalStateException: Crashed on  3",
+        "Emitting 1\n1\nEmitting 2\n2\nCaught java.lang.IllegalStateException: Crashed on 2",
+        "Emitting 1\n1\nEmitting 2\nCaught java.lang.IllegalStateException: Crashed on 2",
+        "Emitting 1\nCollected 1\nEmitting 2\nCollected 2\nCaught java.lang.IllegalStateException: Crashed on  2",
+        "Emitting 1\n1\nEmitting 2\n2\nCaught java.lang.IllegalArgumentException: Crashed on  2"
+      ],
+      "correctAnswerNumber": 2,
+      "explanation": "This exception is still caught and collection is stopped",
+      "tags": [
+        "flow operators II"
+      ],
+      "comment:": "exceptions"
+    },
+    {
+      "id": 20,
+      "title": "What will be the output when you run this code?",
+      "code": "fun main() = runBlocking {\n    simple()\n        .catch { e -> emit(\"Caught $e\") }\n        .collect { value -> println(value) }\n}\n\nfun simple(): Flow<String> =\n    flow {\n        for (i in 1..3) {\n            println(\"Emitting $i\")\n            emit(i)\n        }\n    }\n        .map { value ->\n            check(value <= 1) { \"Crashed on $value\" }\n            \"string $value\"\n        }",
+      "answers": [
+        "Compilation error",
+        "Runtime error",
+        "Caught java.lang.IllegalStateException: Crashed on 1",
+        "Emitting 1\nCaught java.lang.IllegalStateException: Crashed on 1",
+        "Emitting 1\nstring 1\nCaught java.lang.IllegalStateException: Crashed on 1",
+        "Emitting 1\nstring 1\nEmitting 2\nCaught java.lang.IllegalStateException: Crashed on 2",
+        "Emitting 1\nstring 1\nEmitting 2\nstring 2\nCaught java.lang.IllegalStateException: Crashed on 2"
+      ],
+      "correctAnswerNumber": 5,
+      "explanation": "The consumer can use a catch operator (this way preserve the exception transparency) which allows encapsulation of its exception handling. The body of the catch operator can analyze an exception and react to it in different ways depending on which exception was caught:\n\nExceptions can be rethrown using throw.\n\nExceptions can be turned into emission of values using emit from the body of catch.\n\nExceptions can be ignored, logged, or processed by some other code.\n\nException transparency: Flows must be transparent to exceptions and it is a violation of the exception transparency to emit values in the flow { ... } builder from inside of a try/catch block. This guarantees that a collector throwing an exception can always catch it using try/catch",
+      "tags": [
+        "flow operators II"
+      ],
+      "comment:": "Exception transparency"
+    },
+    {
+      "id": 23,
+      "title": "What will be the output when you run this code?",
+      "code": "fun main() = runBlocking {\n    simple()\n        .catch { e -> println(\"Caught $e\") } \n        .collect { value ->\n            check(value <= 1) { \"Collected $value\" }\n            println(value)\n        }\n}\n\nfun simple(): Flow<Int> = flow {\n    for (i in 1..3) {\n        println(\"Emitting $i\")\n        emit(i)\n    }\n}",
+      "answers": [
+        "Emitting 1\n1\nEmitting 2\nException in thread \"main\" java.lang.IllegalStateException: Collected 2\n",
+        "Emitting 1\n1\nEmitting 2\nCaught java.lang.IllegalStateException: Collected 2",
+        "Compilation error",
+        "Runtime Exception"
+      ],
+      "correctAnswerNumber": 0,
+      "explanation": "The catch intermediate operator, honoring exception transparency, catches only upstream exceptions (that is an exception from all the operators above catch, but not below it). If the block in collect { ... } (placed below catch) throws an exception then it escapes.",
+      "tags": [
+        "flow operators II"
+      ],
+      "comment:": "Exception transparency, catch operator"
+    },
+    {
+      "id": 24,
+      "title": "What will be the output when you run this code?",
+      "code": "fun main() = runBlocking {\n    simple()\n        .onCompletion { cause -> if (cause != null) println(\"Flow completed exceptionally\") }\n        .catch { cause -> println(\"Caught exception $cause\") }\n        .collect { value -> println(value) }\n}\n\n\nfun simple(): Flow<Int> = flow {\n    emit(1)\n    throw RuntimeException()\n}",
+      "answers": [
+        "1\nCaught exception java.lang.RuntimeException",
+        "1\nFlow completed exceptionally\nCaught exception java.lang.RuntimeException",
+        "1\nCaught exception java.lang.RuntimeException\nFlow completed exceptionally\n",
+        "1\nFlow completed exceptionally\n",
+        "Compilation error",
+        "Runtime error"
+      ],
+      "correctAnswerNumber": 1,
+      "explanation": "The onCompletion operator, unlike catch, does not handle the exception. As we can see from the above example code, the exception still flows downstream. It will be delivered to further onCompletion operators and can be handled with a catch operator.",
+      "tags": [
+        "flow operators II"
+      ],
+      "comment:": "Exception transparency"
+    },
+    {
+      "id": 25,
+      "title": "What will be the output when you run this code?",
+      "code": "fun main() = runBlocking {\n    simple()\n        .onCompletion { cause -> println(\"Flow completed with $cause\") }\n        .collect { value ->\n            check(value <= 1) { \"Collected $value\" }\n            println(value)\n        }\n}\n\nfun simple(): Flow<Int> = (1..3).asFlow()\n",
+      "answers": [
+        "Compilation error",
+        "Runtime error",
+        "1\nException in thread \"main\" java.lang.IllegalStateException: Collected 2",
+        "1\nFlow completed with java.lang.IllegalStateException: Collected 2\nException in thread \"main\" java.lang.IllegalStateException: Collected 2"
+      ],
+      "correctAnswerNumber": 3,
+      "explanation": "Another difference with catch operator is that onCompletion sees all exceptions and receives a null exception only on successful completion of the upstream flow (without cancellation or failure).We can see the completion cause is not null, because the flow was aborted due to downstream exception.",
+      "tags": [
+        "flow operators II"
+      ],
+      "comment:": "Flow completion"
+    },
+    {
+      "id": 26,
+      "title": "What will be the output when you run this code?",
+      "code": "fun main() = runBlocking {\n    events()\n        .onEach { event -> println(\"Event: $event\") }\n        .collect()\n    println(\"Done\")\n}\n\nfun events(): Flow<Int> = (1..3).asFlow().onEach { delay(100) }",
+      "answers": [
+        "Event: 1\nEvent: 2\nEvent: 3\nDone\n",
+        "Done\nEvent: 1\nEvent: 2\nEvent: 3",
+        "Compilation error",
+        "Runtime error"
+      ],
+      "correctAnswerNumber": 0,
+      "explanation": "onEach{} returns a flow that invokes the given action before each value of the upstream flow is emitted downstream. So it is an intermediate operator which means we also need a terminal operator to collect the flow. Otherwise, just calling onEach has no effect.",
+      "tags": [
+        "flow operators II"
+      ],
+      "comment:": "Launching flow"
+    },
+    {
+      "id": 27,
+      "title": "What will be the output when you run this code?",
+      "code": "fun main() = runBlocking {\n    events()\n        .onEach { event -> println(\"Event: $event\") }\n        .launchIn(this)\n    println(\"Done\")\n}\n\nfun events(): Flow<Int> = (1..3).asFlow().onEach { delay(100) }",
+      "answers": [
+        "Event: 1\nEvent: 2\nEvent: 3\nDone\n",
+        "Done\nEvent: 1\nEvent: 2\nEvent: 3",
+        "Compilation error",
+        "Runtime error"
+      ],
+      "correctAnswerNumber": 1,
+      "explanation": "By replacing collect with launchIn from the previous exercise, we can launch a collection of the flow in a separate coroutine, so that execution of further code immediately continues. \n The required parameter to launchIn must specify a CoroutineScope in which the coroutine to collect the flow is launched. In the above example this scope comes from the runBlocking coroutine builder, so while the flow is running, this runBlocking scope waits for completion of its child coroutine and keeps the main function from returning and terminating this example. \nNote that launchIn also returns a Job, which can be used to cancel the corresponding flow collection coroutine only without cancelling the whole scope or to join it.",
+      "tags": [
+        "flow operators II"
+      ],
+      "comment:": "Launching flow"
+    },
+    {
+      "id": 28,
+      "title": "What will be the output when you run this code?",
+      "code": "fun simple(): Flow<Int> = flow {\n    for (i in 1..3) {\n        delay(100)\n        println(\"Emitting $i\")\n        emit(i)\n    }\n}\n\nfun main() = runBlocking {\n    withTimeoutOrNull(250) {\n        simple().collect { value -> println(value) }\n    }\n    println(\"Done\")\n}",
+      "answers": [
+        "Emitting 1\n1\nEmitting 2\n2\nEmitting 3\n3\nDone",
+        "Emitting 1\n1\nEmitting 2\n2\nDone",
+        "Emitting 1\n1\nDone",
+        "Compilation error",
+        "Runtime error"
+      ],
+      "correctAnswerNumber": 1,
+      "explanation": "Flow adheres to the general cooperative cancellation of coroutines. As usual, flow collection can be cancelled when the flow is suspended in a cancellable suspending function (like delay).",
+      "tags": [
+        "flow operators II"
+      ],
+      "comment:": "Flow cancellation checks"
+    },
+    {
+      "id": 29,
+      "title": "What will be the output when you run this code?",
+      "code": "fun main() = runBlocking {\n    foo().collect { value ->\n        if (value == 3) cancel()\n        println(value)\n    }\n}\n\nfun foo(): Flow<Int> = flow {\n    for (i in 1..5) {\n        println(\"Emitting $i\")\n        emit(i)\n    }\n}",
+      "answers": [
+        "Emitting 1\n1\nEmitting 2\n2\nEmitting 3\n3\nEmitting 4\nException in thread \"main\" kotlinx.coroutines.JobCancellationException: BlockingCoroutine was cancelled; job=BlockingCoroutine{Cancelled}@33723e30",
+        "Emitting 1\n1\nEmitting 2\n2\nEmitting 3\n3\nException in thread \"main\" kotlinx.coroutines.JobCancellationException: BlockingCoroutine was cancelled; job=BlockingCoroutine{Cancelled}@33723e30",
+        "Emitting 1\n1\nEmitting 2\n2\nEmitting 3\n3\nEmitting 4\n4\nEmitting 5\n5\nException in thread \"main\" kotlinx.coroutines.JobCancellationException: BlockingCoroutine was cancelled; job=BlockingCoroutine{Cancelled}@371a67ec",
+        "Compilation error",
+        "Runtime error"
+      ],
+      "correctAnswerNumber": 0,
+      "explanation": "For convenience, the flow builder performs additional ensureActive checks for cancellation on each emitted value. It means that a busy loop emitting from a flow { ... } is cancellable.We get only numbers up to 3 and a CancellationException after trying to emit number 4",
+      "tags": [
+        "flow operators II"
+      ],
+      "comment:": "Flow cancellation checks"
+    },
+    {
+      "id": 30,
+      "title": "What will be the output when you run this code?",
+      "code": "fun main() = runBlocking {\n    foo().collect { value ->\n        println(\"Emitting $value\")\n\n        if (value == 3) cancel()\n        println(value)\n    }\n}\n\nfun foo(): Flow<Int> =   (1..5).asFlow()",
+      "answers": [
+        "Emitting 1\n1\nEmitting 2\n2\nEmitting 3\n3\nEmitting 4\nException in thread \"main\" kotlinx.coroutines.JobCancellationException: BlockingCoroutine was cancelled; job=BlockingCoroutine{Cancelled}@33723e30",
+        "Emitting 1\n1\nEmitting 2\n2\nEmitting 3\n3\nException in thread \"main\" kotlinx.coroutines.JobCancellationException: BlockingCoroutine was cancelled; job=BlockingCoroutine{Cancelled}@33723e30",
+        "Emitting 1\n1\nEmitting 2\n2\nEmitting 3\n3\nEmitting 4\n4\nEmitting 5\n5\nException in thread \"main\" kotlinx.coroutines.JobCancellationException: BlockingCoroutine was cancelled; job=BlockingCoroutine{Cancelled}@371a67ec",
+        "Compilation error",
+        "Runtime error"
+      ],
+      "correctAnswerNumber": 2,
+      "explanation": "Most flow operators I do not do additional cancellation checks on their own for performance reasons. If you use IntRange.asFlow extension and don't suspend anywhere, then there are no checks for cancellation.",
+      "tags": [
+        "flow operators II"
+      ],
+      "comment:": "Flow cancellation checks"
+    },
+    {
+      "id": 31,
+      "title": "What will be the output when you run this code?",
+      "code": "fun main() = runBlocking {\n    foo().cancellable().collect { value ->\n        println(\"Emitting $value\")\n\n        if (value == 3) cancel()\n        println(value)\n    }\n}\n\nfun foo(): Flow<Int> =   (1..5).asFlow()",
+      "answers": [
+        "Emitting 1\n1\nEmitting 2\n2\nEmitting 3\n3\nEmitting 4\nException in thread \"main\" kotlinx.coroutines.JobCancellationException: BlockingCoroutine was cancelled; job=BlockingCoroutine{Cancelled}@33723e30",
+        "Emitting 1\n1\nEmitting 2\n2\nEmitting 3\n3\nException in thread \"main\" kotlinx.coroutines.JobCancellationException: BlockingCoroutine was cancelled; job=BlockingCoroutine{Cancelled}@33723e30",
+        "Emitting 1\n1\nEmitting 2\n2\nEmitting 3\n3\nEmitting 4\n4\nEmitting 5\n5\nException in thread \"main\" kotlinx.coroutines.JobCancellationException: BlockingCoroutine was cancelled; job=BlockingCoroutine{Cancelled}@371a67ec",
+        "Compilation error",
+        "Runtime error"
+      ],
+      "correctAnswerNumber": 1,
+      "explanation": "In the case where you have a busy loop with coroutines you must explicitly check for cancellation. You can add .onEach { currentCoroutineContext().ensureActive() }, but there is a ready-to-use cancellable operator provided to do that.With the cancellable operator only the numbers from 1 to 3 are collected.",
+      "tags": [
+        "flow operators II"
+      ],
+      "comment:": "Flow cancellation checks"
+    }
+  ]
+}

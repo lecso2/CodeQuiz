@@ -1,0 +1,195 @@
+{
+  "puzzles": [
+    {
+      "id": 1,
+      "title": "What will this code print?",
+      "code": "fun main() {\n    val x = CoroutineScope(EmptyCoroutineContext)\n    println(x)\n}",
+      "answers": [
+        "Compilation error",
+        "Runtime error",
+        "CoroutineScope()",
+        "CoroutineScope(coroutineContext=JobImpl{Active}@77caeb3e)",
+        "null"
+      ],
+      "correctAnswerNumber": 3,
+      "explanation": "You can create a CoroutineScope, which needs CoroutineContext as a parameter. If the CoroutineContext doesn't have a Job, it will create one.",
+      "tags": [
+        "coroutineScope"
+      ]
+    },
+    {
+      "id": 1,
+      "title": "Which one of these CoroutineContext declarations are valid?",
+      "code": "//1\nCoroutineScope(CoroutineContext()).launch {\n   println(\"Hello\")\n  }\n\n //2\nCoroutineScope(CoroutineName(\"name\")).launch {\n            println(\"Hello\")\n        }\n\n//3\nCoroutineScope(CoroutineName(\"name\") + Job()).launch {\n  println(\"Hello\")\n}",
+      "answers": [
+        "1",
+        "1, 2",
+        "2, 3",
+        "1, 2, 3"
+      ],
+      "correctAnswerNumber": 2,
+      "explanation": "CoroutineContext is like a Map<CoroutineContext.Key, Element> with the + operator, where the constructor is private. You can't directly create a CoroutineContext() \n(which would be an empty Map), you can only create CoroutineContext by creating an Element (and add more Elements to it).\nThis works, because Element implements the CoroutineContext interface. So, in 2 you have a CoroutineContext with a CoroutineName Element,\nand in 3 you have a CoroutineContext with a CoroutineName and a Job Element.",
+      "tags": [
+        "coroutineScope"
+      ]
+    },
+    {
+      "id": 2,
+      "title": "What will this code print?",
+      "code": "CoroutineScope(CoroutineName(\"name\") + CoroutineName(\"name2\")).launch {\n            println(\"${coroutineContext[CoroutineName.Key]}\")\n            println(\"${coroutineContext[Job.Key]}\")\n            println(\"${coroutineContext[CoroutineDispatcher.Key]}\")\n            println(\"${coroutineContext[CoroutineExceptionHandler.Key]}\")\n        }",
+      "answers": [
+        "CoroutineName(name2)\nnull\nnull\nnull",
+        "CoroutineName(name2)\nDispatchers.Default\nnull\nnull",
+        "CoroutineName(name2)\nStandaloneCoroutine{Active}@903636a\nnull\nnull",
+        "CoroutineName(name2)\nStandaloneCoroutine{Active}@903636a\nDispatchers.Default\nnull",
+        "CoroutineName(name2)\nStandaloneCoroutine{Active}@903636a\nDispatchers.Default\nCoroutineExceptionHandler$1@4867957c"
+      ],
+      "correctAnswerNumber": 3,
+      "explanation": "Because CoroutineContext works like a Map<CoroutineContext.Key, Element> (every Element has a CoroutineContext.Key), adding the same Element that it already has will replace the previous. So the first line will be CoroutineName(name2).\nThe launch() method creates a Job for the coroutine, so the next line will be something like StandaloneCoroutine{Active}@3745d7f8.\nThe launch() method adds the default dispatcher (Dispatcher.Default) to the context, if no Dispatcher is defined (by calling CoroutineScope.newCoroutineContext(context: CoroutineContext)). So the next line will be Dispatchers.Default\nIf the context doesn’t have a CoroutineExceptionHandler, then the global handler is used (but not installed in the context).\nNote: Jobs and Dispatchers can't be added to one another.",
+      "tags": [
+        "coroutineScope"
+      ]
+    },
+    {
+      "id": 3,
+      "title": "How many different Elements can be in the CoroutineContext?",
+      "code": "",
+      "answers": [
+        "4",
+        "5",
+        "6"
+      ],
+      "correctAnswerNumber": 0,
+      "explanation": "ContinuationInterceptor: invoked for continuations, to manage the underlying execution threads. In practice, implementations always extend the CoroutineDispatcher base class.\n\nJob: models the life-cycle and task hierarchy in which a coroutine is being executed.\n\nCoroutineExceptionHandler: used by coroutine builders which don’t propagate exceptions, namely launch and actor, in order to determine what to do if an exception is encountered. See the dedicated CoroutineExceptionHandler section in the guide for more details.\n\nCoroutineName: used for debugging purposes. See the dedicated section on Naming coroutines for debugging in the guide for more details.",
+      "tags": [
+        "coroutineScope"
+      ]
+    },
+    {
+      "id": 4,
+      "title": "What will this code print?",
+      "code": "        CoroutineScope(EmptyCoroutineContext).launch {\n            println(\"$coroutineContext\")\n        }",
+      "answers": [
+        "compilation error",
+        "nothing",
+        "[StandaloneCoroutine{Active}@a7f9be6, Dispatchers.Default]"
+      ],
+      "correctAnswerNumber": 2,
+      "explanation": "The launch() method adds a default Dispatcher to the EmptyCoroutineContext and the CoroutineScope creates a Job.",
+      "tags": [
+        "coroutineScope"
+      ]
+    },
+    {
+      "id": 5,
+      "title": "What will this code print?",
+      "code": "fun main() = runBlocking {\n    launch {\n        delay(1000L)\n        println(\"World!\")\n    }\n    println(\"Hello\")\n}",
+      "answers": [
+        "Hello",
+        "World!",
+        "World!\nHello",
+        "Hello\nWorld!"
+      ],
+      "correctAnswerNumber": 3,
+      "explanation": "runBlocking{} runs a new coroutine and blocks the current thread interruptibly until its completion. \nlaunch{} inherits the CoroutineScope from it's parent, so it's job will be the runBlocking's job' child. runBlocking waits for it's children, so it will print Hello and after the delay World!",
+      "tags": [
+        "coroutineScope"
+      ]
+    },
+    {
+      "id": 6,
+      "title": "What will this code print?",
+      "code": "fun main() = runBlocking {\n    launch(CoroutineName(\"name\")) {\n        delay(1000L)\n        println(\"World!\")\n    }\n    println(\"Hello\")\n}",
+      "answers": [
+        "Hello",
+        "World!",
+        "World!\nHello",
+        "Hello\nWorld!"
+      ],
+      "correctAnswerNumber": 3,
+      "explanation": "As in the previous code, the CoroutineScope is inherited, only the CoroutineName is overridden, so the job in launcy{} will be the child of the runBlocking's.",
+      "tags": [
+        "coroutineScope"
+      ]
+    },
+    {
+      "id": 7,
+      "title": "What will this code print?",
+      "code": "fun main() = runBlocking {\n    launch(Job()) {\n        delay(1000L)\n        println(\"World!\")\n    }\n    println(\"Hello\")\n}",
+      "answers": [
+        "Hello",
+        "World!",
+        "World!\nHello",
+        "Hello\nWorld!"
+      ],
+      "correctAnswerNumber": 0,
+      "explanation": "As in the previous code, the CoroutineScope is inherited, but this time the Job is overriden, so the lanuch{}'s Job won't be the child of the runBlocking's Job and it won't block until it finishes.",
+      "tags": [
+        "coroutineScope"
+      ]
+    },
+    {
+      "id": 8,
+      "title": "What will this code print?",
+      "code": "fun main() = runBlocking {\nCoroutineScope(CoroutineName(\"name\")).launch {\n        delay(1000L)\n        println(\"World!\")\n    }\n    println(\"Hello\")\n}",
+      "answers": [
+        "Hello",
+        "World!",
+        "World!\nHello",
+        "Hello\nWorld!"
+      ],
+      "correctAnswerNumber": 0,
+      "explanation": "This time the CoroutineScope is not inherited because a new one is created. The Job in launch{} won't be the child of the runBlocking's Job, so it won't wait.",
+      "tags": [
+        "coroutineScope"
+      ]
+    },
+    {
+      "id": 9,
+      "title": "What will this code print out?",
+      "code": "fun main() {\n    runBlocking {\n\n        launch {\n            println(CoroutineContext[Job.Key])\n        }\n\n    }\n}",
+      "answers": [
+        "Compilation error",
+        "Runtime error",
+        "null",
+        "StandaloneCoroutine{Active}@42f93a98"
+      ],
+      "correctAnswerNumber": 0,
+      "explanation": "CoroutineContext is the class (capital C), you can get the current context with coroutineContext (small c).",
+      "tags": [
+        "coroutineScope"
+      ]
+    },
+    {
+      "id": 10,
+      "title": "What will this code print out?",
+      "code": "",
+      "answers": [
+        "Compilation error",
+        "Runtime error",
+        "null",
+        "StandaloneCoroutine{Active}@42f93a98"
+      ],
+      "correctAnswerNumber": 0,
+      "explanation": "CoroutineContext is the class (capital C), you can get the current context with coroutineContext (small c).",
+      "tags": [
+        "coroutineScope"
+      ]
+    },
+    {
+      "id": 9,
+      "title": "How many Dispatchers can you have on Android?",
+      "code": "",
+      "answers": [
+        "3",
+        "4",
+        "5"
+      ],
+      "correctAnswerNumber": 1,
+      "explanation": "Dispatchers.Default: The default threading strategy for starting coroutines, confined to the parent’s context, usually a thread pool of workers.\n\n Dispatchers.IO: Similar to Default, it’s based on the JVM, and is backed by a thread pool to offload IO-related tasks.\n\n Dispatchers.Main: The main thread dispatcher, connected to the thread, which operates with UI objects.\n\n Dispatchers.Unconfined: The name states it, it’s unconfined, and it will run on whichever thread is currently using it ",
+      "tags": [
+        "coroutineScope"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,256 @@
+{
+  "puzzles": [
+    {
+      "id": 0,
+      "title": "What will be the output when you run this code?",
+      "code": "fun simple(): Flow<Int> = flow {\n    println(\"Flow started\")\n    for (i in 1..3) {\n        delay(100)\n        emit(i)\n    }\n}\n\nfun main() = runBlocking<Unit> {\n    println(\"Calling simple function...\")\n    val flow = simple()\n    println(\"Calling collect...\")\n    flow.collect { value -> println(value) }\n    println(\"Calling collect again...\")\n    flow.collect { value -> println(value) }\n}",
+      "answers": [
+        "Compilation error",
+        "Runtime error",
+        "Calling simple function...\nCalling collect...\nFlow started\n1\n2\n3\nCalling collect again...\nFlow started\n1\n2\n3",
+        "Calling simple function...\nFlow started\nCalling collect...\n1\n2\n3\nCalling collect again...\n1\n2\n3",
+        "Calling simple function...\nCalling collect...\nFlow started\n1\nCalling collect again...\nn2",
+        "Calling simple function...\nFlow started\nCalling collect...\n1\nCalling collect again...\n2"
+      ],
+      "correctAnswerNumber": 2,
+      "explanation": "Flows are cold streams similar to sequences — the code inside a flow builder does not run until the flow is collected.The flow starts every time it is collected, that is why we see \"Flow started\" when we call collect again.",
+      "tags": [
+        "flow operators I"
+      ],
+      "comment:": "Flows are cold"
+    },
+    {
+      "id": 1,
+      "title": "What will be the output when you run this code?",
+      "code": "fun main() = runBlocking {\n    (1..3).asFlow()\n        .transform { request ->\n            emit(\"Making request $request\")\n            emit(performRequest(request))\n        }\n        .collect { response -> println(response) }\n}\n\nsuspend fun performRequest(request: Int): String {\n    delay(1000)\n    return \"response $request\"\n}",
+      "answers": [
+        "Compilation error",
+        "Runtime error",
+        "Making request 1\nresponse 1\nMaking request 2\nresponse 2\nMaking request 3\nresponse 3",
+        "Making request 1\nMaking request 2\nMaking request 3\nresponse 1\nresponse 2\nresponse 3"
+      ],
+      "correctAnswerNumber": 2,
+      "explanation": "Among the flow transformation operators, the most general one is called transform. It can be used to imitate simple transformations like map and filter, as well as implement more complex transformations. Using the transform operator, we can emit arbitrary values an arbitrary number of times.\n\nFor example, using transform we can emit a string before performing a long-running asynchronous request and follow it with a response.",
+      "tags": [
+        "flow operators I"
+      ],
+      "comment:": "Transform operator, transform"
+    },
+    {
+      "id": 2,
+      "title": "What will be the output when you run this code?",
+      "code": "fun main() = runBlocking {\n    numbers()\n        .take(2)\n        .collect { value -> println(value) }\n}\n\nfun numbers(): Flow<Int> = flow {\n    emit(1)\n    emit(2)\n    emit(3)\n}",
+      "answers": [
+        "1\n2",
+        "2",
+        "1\n2\n3",
+        "Compilation error",
+        "Runtime error"
+      ],
+      "correctAnswerNumber": 0,
+      "explanation": "Size-limiting intermediate operators like take{} cancel the execution of the flow when the corresponding limit is reached.",
+      "tags": [
+        "flow operators I"
+      ],
+      "comment:": "Size-limiting operators, take"
+    },
+    {
+      "id": 3,
+      "title": "What will be the output when you run this code?",
+      "code": "fun main() = runBlocking {\n    val sum = (1..3).asFlow()\n        .map { it * it }\n        .reduce { a, b -> a + b }\n        .map { \"the sum is: $it\"}\n    println(sum)\n}",
+      "answers": [
+        "6",
+        "14",
+        "9",
+        "Compilation error",
+        "Runtime error"
+      ],
+      "correctAnswerNumber": 3,
+      "explanation": "reduce{} is a terminal operator, so there can't be a map{} after that.\nTerminal operators on flows are suspending functions that start a collection of the flow. The collect operator is the most basic one, but there are other terminal operators, which can make it easier:\n\n- Conversion to various collections like toList{} and toSet{}\n\n- Operators to get the first{} value and to ensure that a flow emits a single{} value\n\n- Reducing a flow to a value with reduce{} and fold{}",
+      "tags": [
+        "flow operators I"
+      ],
+      "comment:": "terminal, collect after terminal"
+    },
+    {
+      "id": 4,
+      "title": "What will be the output when you run this code?",
+      "code": "fun main() = runBlocking {\n    (1..5).asFlow()\n        .filter {\n            println(\"Filter $it\")\n            it % 2 == 0\n        }\n        .map {\n            println(\"Map $it\")\n            \"string $it\"\n        }\n}",
+      "answers": [
+        "Filter 1\nFilter 2\nMap 2\nFilter 3\nFilter 4\nMap 4\nFilter 5",
+        "Filter 2\nMap 2\nFilter 4\nMap 4\n",
+        "Runtime error",
+        "Compilation error"
+      ],
+      "correctAnswerNumber": 3,
+      "explanation": "There is no terminal operator this time, so the answer is (a misleading) Compilation error : Error running YourClass.kt: Class YourClassKt not found in module YourModule",
+      "tags": [
+        "flow operators I"
+      ],
+      "comment:": "terminal, no terminal"
+    },
+    {
+      "id": 5,
+      "title": "What will be the output when you run this code?",
+      "code": "fun main() = runBlocking {\n    (1..5).asFlow()\n        .filter {\n            println(\"Filter $it\")\n            it % 2 == 0\n        }\n        .map {\n            println(\"Map $it\")\n            \"string $it\"\n        }.collect {\n            println(\"Collect $it\")\n        }\n}",
+      "answers": [
+        "Filter 2\nMap 2\nCollect string 2\nFilter 4\nMap 4\nCollect string 4",
+        "Filter 1\nFilter 2\nMap 2\nCollect string 2\nFilter 3\nFilter 4\nMap 4\nCollect string 4\nFilter 5",
+        "Filter 1\nFilter 2\nFilter 3\nFilter 4\nFilter 5\nMap 2\nMap 4\nCollect string 2\nCollect string 4",
+        "Compilation error",
+        "Runtime error"
+      ],
+      "correctAnswerNumber": 1,
+      "explanation": "A flow is performed sequentially unless special operators that operate on multiple flows are used. Each emitted value is processed by all the intermediate operators from upstream to downstream to the terminal operator on the end. \nfiler{} takes in the value (so it will print every value) and returns a flow containing only values that match the given predicate.",
+      "tags": [
+        "flow operators I"
+      ],
+      "comment:": "Flows are sequential"
+    },
+    {
+      "id": 6,
+      "title": "What will be the output when you run this code?",
+      "code": "fun main() = runBlocking {\n    simple().collect { value -> log(\"Collected $value\") }\n    delay(1000)\n}\n\nfun simple(): Flow<Int> = flow {\n    CoroutineScope(CoroutineName(\"coroutine1\")).launch {\n        for (i in 1..3) {\n            emit(i)\n        }\n    }\n}\n\nfun log(msg: String) = println(\"[${Thread.currentThread().name}] $msg\")",
+      "answers": [
+        "[main] Collected 1\n[main] Collected 2\n[main] Collected 3",
+        "[null] Collected 1\n[null] Collected 2\n[null] Collected 3",
+        "Compilation error",
+        "RuntimeException"
+      ],
+      "correctAnswerNumber": 3,
+      "explanation": "The result will be: Exception in thread \"DefaultDispatcher-worker-1\" java.lang.IllegalStateException: Flow invariant is violated:\n\t\tEmission from another coroutine is detected.\n\nCollection of a flow always happens in the context of the calling coroutine.\nThis property of a flow is called context preservation.\nSo, by default, code in the flow { ... } builder runs in the context that is provided by a collector of the corresponding flow.\nThis is the perfect default for fast-running or asynchronous code that does not care about the execution context and does not block the caller.Code in the flow { ... } builder has to honor the context preservation property and is not allowed to emit from a different context.",
+      "tags": [
+        "flow operators I"
+      ],
+      "comment:": "Flow context"
+    },
+    {
+      "id": 7,
+      "title": "What will be the output when you run this code?",
+      "code": "fun main() = runBlocking {\n    simple().collect { value ->\n        log(\"Collected $value\")\n    }\n}\n\nfun simple(): Flow<Int> = flow {\n    for (i in 1..3) {\n        Thread.sleep(100)\n        log(\"Emitting $i\")\n        emit(i)\n    }\n}.flowOn(Dispatchers.Default)\n\nfun log(msg: String) = println(\"[${Thread.currentThread().name}] $msg\")",
+      "answers": [
+        "[main] Emitting 1\n[main] Collected 1\n[main] Emitting 2\n[main] Collected 2\n[main] Emitting 3\n[main] Collected 3",
+        "[DefaultDispatcher-worker-1] Emitting 1\n[DefaultDispatcher-worker-1] Collected 1\n[DefaultDispatcher-worker-1] Emitting 2\n[DefaultDispatcher-worker-1] Collected 2\n[DefaultDispatcher-worker-1] Emitting 3\n[DefaultDispatcher-worker-1] Collected 3",
+        "[DefaultDispatcher-worker-1] Emitting 1\n[main] Collected 1\n[DefaultDispatcher-worker-1] Emitting 2\n[main] Collected 2\n[DefaultDispatcher-worker-1] Emitting 3\n[main] Collected 3",
+        "[main] Emitting 1\n[DefaultDispatcher-worker-1] Collected 1\n[main] Emitting 2\n[DefaultDispatcher-worker-1] Collected 2\n[main] Emitting 3\n[DefaultDispatcher-worker-1] Collected 3",
+        "RuntimeException",
+        "Compilation error"
+      ],
+      "correctAnswerNumber": 2,
+      "explanation": "The flowOn{} function shall be used to change the context of the flow emission. flow { ... } works in the background thread, while collection happens in the main thread. \n",
+      "tags": [
+        "flow operators I"
+      ],
+      "comment:": "Flow context"
+    },
+    {
+      "id": 8,
+      "title": "What will be the output when you run this code (approximately) ?",
+      "code": "fun main() = runBlocking {\n    val time = measureTimeMillis {\n        simple().collect { value ->\n            delay(300)\n            println(value)\n        }\n    }\n    println(\"Collected in $time ms\")\n}\n\nfun simple(): Flow<Int> = flow {\n    for (i in 1..3) {\n        delay(100)\n        emit(i)\n    }\n}",
+      "answers": [
+        "1\n2\n3\nCollected in 900 ms",
+        "1\n2\n3\nCollected in 1000 ms",
+        "1\n2\n3\nCollected in 1100 ms",
+        "1\n2\n3\nCollected in 1200 ms"
+      ],
+      "correctAnswerNumber": 3,
+      "explanation": "The flow{} emits each value after 100 ms and the collect{} waits 300 ms when it is arrived. After processing the first value can collect{} get the next value (100 ms) and process it (300 ms). 3x400 = 1200 ",
+      "tags": [
+        "flow operators I"
+      ],
+      "comment:": "Buffering, collect"
+    },
+    {
+      "id": 9,
+      "title": "What will be the output when you run this code (approximately) ?",
+      "code": "fun simple(): Flow<Int> = flow {\n    for (i in 1..3) {\n        delay(100)\n        emit(i)\n    }\n}\n\nfun main() = runBlocking {\n    val time = measureTimeMillis {\n        simple()\n            .buffer()\n            .collect { value ->\n                delay(300)\n                println(value)\n            }\n    }\n    println(\"Collected in $time ms\")\n}",
+      "answers": [
+        "1\n2\n3\nCollected in 900 ms",
+        "1\n2\n3\nCollected in 1000 ms",
+        "1\n2\n3\nCollected in 1100 ms",
+        "1\n2\n3\nCollected in 1200 ms"
+      ],
+      "correctAnswerNumber": 1,
+      "explanation": "A buffer operator on a flow collects the values until it overflows, so the emitter can run parallel with the collector. So it will take 100 ms to produce the first value and then while the collector processes them (900 ms) the 2 other values are produced.\n\n When the buffer is overflows, it suspends the emitter to let the collector catch up. This strategy can be overridden with an optional onBufferOverflow parameter so that the emitter is never suspended. In this case, on buffer overflow either the oldest value in the buffer is dropped with the DROP_OLDEST strategy and the latest emitted value is added to the buffer, or the latest value that is being emitted is dropped with the DROP_LATEST strategy, keeping the buffer intact. To implement either of the custom strategies, a buffer of at least one element is used.",
+      "tags": [
+        "flow operators I"
+      ],
+      "comment:": "Buffering, buffer"
+    },
+    {
+      "id": 10,
+      "title": "What will be the output when you run this code (approximately) ?",
+      "code": "fun simple(): Flow<Int> = flow {\n    for (i in 1..3) {\n        delay(100)\n        emit(i)\n    }\n}\n\nfun main() = runBlocking {\n    val time = measureTimeMillis {\n        simple()\n            .conflate()\n            .collect { value ->\n                println(\"Collecting $value\")\n                delay(300)\n                println(\"Done $value\")\n            }\n    }\n    println(\"Collected in $time ms\")\n}",
+      "answers": [
+        "Collecting 1\nDone 1\nCollecting 2\nDone 2\nCollecting 3\nDone 3\nCollected in 780 ms",
+        "Collecting 1\nDone 1\nCollecting 3\nDone 3\nCollected in 780 ms",
+        "Collecting 1\nCollecting 2\nCollecting 3\nDone 3\nCollected in 780 ms",
+        "Collecting 1\nDone 1\nCollecting 3\nDone 3\nCollected in 780 ms",
+        "Compilation error",
+        "Runtime error"
+      ],
+      "correctAnswerNumber": 1,
+      "explanation": "Conflation is one way to speed up processing when both the emitter and collector are slow. It does it by dropping emitted values.\nWhen a flow represents partial results of the operation or operation status updates, it may not be necessary to process each value, but instead, only most recent ones. In this case, the conflate operator can be used to skip intermediate values when a collector is too slow to process them.\nWe see that while the first number was still being processed the second, and third were already produced, so the second one was conflated and only the most recent (the third one) was delivered to the collector.",
+      "tags": [
+        "flow operators I"
+      ],
+      "comment:": "Buffering, conflate"
+    },
+    {
+      "id": 11,
+      "title": "What will be the output when you run this code (approximately) ?",
+      "code": "fun simple(): Flow<Int> = flow {\n    for (i in 1..3) {\n        delay(100)\n        emit(i)\n    }\n}\n\nfun main() = runBlocking {\n    val time = measureTimeMillis {\n        simple()\n            .collectLatest { value ->\n                println(\"Collecting $value\")\n                delay(300)\n                println(\"Done $value\")\n            }\n    }\n    println(\"Collected in $time ms\")\n}",
+      "answers": [
+        "Collecting 1\nDone 1\nCollecting 2\nDone 2\nCollecting 3\nDone 3\nCollected in 680 ms",
+        "Collecting 1\nDone 1\nCollecting 3\nDone 3\nCollected in 680 ms",
+        "Collecting 1\nCollecting 2\nCollecting 3\nDone 3\nCollected in 680 ms",
+        "Collecting 1\nDone 1\nCollecting 3\nDone 3\nCollected in 680 ms",
+        "Compilation error",
+        "Runtime error"
+      ],
+      "correctAnswerNumber": 2,
+      "explanation": "Another way to speed up processing when the both the emitter and collector is slow is to cancel a slow collector and restart it every time a new value is emitted. There is a family of xxxLatest operators that perform the same essential logic of a xxx operator, but cancel the code in their block on a new value. Since the body of collectLatest takes 300 ms, but new values are emitted every 100 ms, we see that the block is run on every value, but completes only for the last value. On the other cases, it gets cancelled during processing.",
+      "tags": [
+        "flow operators I"
+      ],
+      "comment:": "Buffering, collectLatest"
+    },
+    {
+      "id": 12,
+      "title": "What will be the output when you run this code?",
+      "code": "fun main() = runBlocking {\n    simple()\n        .retry(3) {\n            println(\"checking for retry...\")\n            it is IndexOutOfBoundsException\n        }.catch {\n            print(\"exception caught: $it\")\n        }\n        .collect {\n            println(\"collected: $it\")\n        }\n}\n\nfun simple(): Flow<Int> =\n    flow {\n        for (i in 1..4) {\n            if (i == 1) {\n                println(\"$i : throwing IndexOutOfBoundsException\")\n                throw IndexOutOfBoundsException()\n            } else if (i == 3) {\n                println(\"$i : throwing IOException\")\n                throw  IOException()\n            }\n            emit(i)\n        }\n    }",
+      "answers": [
+        "1 : throwing IndexOutOfBoundsException\nchecking for retry...\n1 : throwing IndexOutOfBoundsException\nchecking for retry...\n1 : throwing IndexOutOfBoundsException\nchecking for retry...\n1 : throwing IndexOutOfBoundsException\nexception caught: java.lang.IndexOutOfBoundsException",
+        "1 : throwing IndexOutOfBoundsException\nchecking for retry...\ncollected: 2\n3 : throwing IOException\nchecking for retry...\nexception caught: java.io.IOException",
+        "1 : throwing IndexOutOfBoundsException\nexception caught: java.lang.IndexOutOfBoundsException",
+        "Compliation error",
+        "Runtime error"
+      ],
+      "correctAnswerNumber": 0,
+      "explanation": "retry{} retries collection of the given flow up to retries times when an exception that matches the given predicate occurs in the upstream flow. This operator is transparent to exceptions that occur in downstream flow and does not retry on exceptions that are thrown to cancel the flow.\n\n retry{} always run when there is an exception to check whether it is true, and when it is, it starts the flow{} from the start. So only the 1 value will be printed, 3 times.",
+      "tags": [
+        "flow operators I"
+      ],
+      "comment:": "retry"
+    },
+    {
+      "id": 13,
+      "title": "What can be the output when you run this code?",
+      "code": "fun main() = runBlocking {\n    simple()\n        .retry(3) {\n            println(\"checking for retry...\")\n            it is IndexOutOfBoundsException\n        }.catch {\n            print(\"exception caught: $it\")\n        }\n        .collect {\n            println(\"collected: $it\")\n        }\n}\n\nfun simple(): Flow<Int> =\n    flow {\n        for (i in 1..4) {\n            val randomInt = (1..4).random()\n            if (randomInt == 1) {\n                println(\"$randomInt : throwing IndexOutOfBoundsException\")\n                throw IndexOutOfBoundsException()\n            } else if (randomInt == 3) {\n                println(\"$randomInt : throwing IOException\")\n                throw  IOException()\n            }\n            emit(randomInt)\n        }\n    }",
+      "answers": [
+        "collected: 2\ncollected: 2\n3 : throwing IOException\nchecking for retry...\nexception caught: java.io.IOException",
+        "collected: 4\ncollected: 4\ncollected: 4\n1 : throwing IndexOutOfBoundsException\nchecking for retry...\ncollected: 4\ncollected: 4\n1 : throwing IndexOutOfBoundsException\nchecking for retry...\ncollected: 2\ncollected: 2\ncollected: 2\ncollected: 2",
+        "1 : throwing IndexOutOfBoundsException\nchecking for retry...\ncollected: 4\n3 : throwing IOException\nchecking for retry...\nexception caught: java.io.IOException",
+        "all above",
+        "Compliation error",
+        "Runtime error"
+      ],
+      "correctAnswerNumber": 3,
+      "explanation": "retry{} retries collection of the given flow up to retries times when an exception that matches the given predicate occurs in the upstream flow. This operator is transparent to exceptions that occur in downstream flow and does not retry on exceptions that are thrown to cancel the flow.\n\n retry{} always run when there is an exception to check whether it is true, and when it is, it starts the flow{} from the start.",
+      "tags": [
+        "flow operators I"
+      ],
+      "comment:": "retry"
+    }
+  ]
+}

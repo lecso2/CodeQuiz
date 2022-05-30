@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="DesignSurface">
+    <option name="filePathToZoomLevelMap">
+      <map>
+        <entry key="..\:/Users/P/AndroidStudioProjects/LearningPuzzlers/app/src/main/res/drawable-v24/background_square_frame.xml" value="0.245" />
+        <entry key="..\:/Users/P/AndroidStudioProjects/LearningPuzzlers/app/src/main/res/drawable-v24/background_yellow_circle.xml" value="0.198" />
+        <entry key="..\:/Users/P/AndroidStudioProjects/LearningPuzzlers/app/src/main/res/drawable/background_circle.xml" value="0.198" />
+        <entry key="..\:/Users/P/AndroidStudioProjects/LearningPuzzlers/app/src/main/res/drawable/background_square_frame.xml" value="0.223" />
+        <entry key="..\:/Users/P/AndroidStudioProjects/LearningPuzzlers/app/src/main/res/drawable/background_square_frame_black.xml" value="0.223" />
+        <entry key="..\:/Users/P/AndroidStudioProjects/LearningPuzzlers/app/src/main/res/drawable/background_white_square_black_frame.xml" value="0.223" />
+        <entry key="..\:/Users/P/AndroidStudioProjects/LearningPuzzlers/app/src/main/res/drawable/background_white_square_yellow_frame.xml" value="0.223" />
+        <entry key="..\:/Users/P/AndroidStudioProjects/LearningPuzzlers/app/src/main/res/drawable/background_yellow_square_black_frame.xml" value="0.223" />
+        <entry key="..\:/Users/P/AndroidStudioProjects/LearningPuzzlers/app/src/main/res/drawable/background_yellow_square_white_frame.xml" value="0.223" />
+        <entry key="..\:/Users/P/AndroidStudioProjects/LearningPuzzlers/app/src/main/res/drawable/ic_home.xml" value="0.223" />
+        <entry key="..\:/Users/P/AndroidStudioProjects/LearningPuzzlers/app/src/main/res/drawable/ic_play_back.xml" value="0.1685" />
+        <entry key="..\:/Users/P/AndroidStudioProjects/LearningPuzzlers/app/src/main/res/drawable/ic_play_button_svgrepo_com.xml" value="0.1685" />
+        <entry key="..\:/Users/P/AndroidStudioProjects/LearningPuzzlers/app/src/main/res/drawable/polygon.xml" value="0.223" />
+        <entry key="..\:/Users/P/AndroidStudioProjects/LearningPuzzlers/app/src/main/res/layout/activity_main.xml" value="0.3546875" />
+        <entry key="..\:/Users/P/AndroidStudioProjects/LearningPuzzlers/app/src/main/res/layout/fragment_menu.xml" value="0.36875" />
+        <entry key="..\:/Users/P/AndroidStudioProjects/LearningPuzzlers/app/src/main/res/layout/fragment_puzzle.xml" value="0.33" />
+        <entry key="..\:/Users/P/AndroidStudioProjects/LearningPuzzlers/app/src/main/res/layout/fragment_result.xml" value="0.36875" />
+        <entry key="..\:/Users/P/AndroidStudioProjects/LearningPuzzlers/app/src/main/res/layout/item_puzzle_category.xml" value="0.36875" />
+        <entry key="..\:/Users/P/AndroidStudioProjects/LearningPuzzlers/app/src/main/res/layout/widget_toolbar.xml" value="0.25" />
+        <entry key="..\:/Users/P/AndroidStudioProjects/LearningPuzzlers/app/src/main/res/mipmap-anydpi-v26/ic_launcher.xml" value="0.198" />
+        <entry key="..\:/Users/P/AndroidStudioProjects/LearningPuzzlers/app/src/main/res/mipmap-anydpi-v26/ic_launcher_round.xml" value="0.198" />
+      </map>
+    </option>
+  </component>
+  <component name="ProjectRootManager" version="2" languageLevel="JDK_11" default="true" project-jdk-name="1.8" project-jdk-type="JavaSDK">
+    <output url="file://$PROJECT_DIR$/build/classes" />
+  </component>
+  <component name="ProjectType">
+    <option name="id" value="Android" />
+  </component>
+</project>

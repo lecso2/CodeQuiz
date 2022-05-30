@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.bam.codequiz.widgets.Toolbar xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:animateLayoutChanges="true"
+    android:orientation="vertical">
+
+    <androidx.appcompat.widget.Toolbar
+        android:layout_width="match_parent"
+        android:layout_height="?attr/actionBarSize"
+        android:theme="@style/MyToolbarTheme">
+
+        <TextView
+            android:id="@+id/back_btn"
+            android:layout_width="92dp"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical|start"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="2dp"
+            android:background="#D1D1D1"
+            android:drawablePadding="5dp"
+            android:fontFamily="@font/poppins_medium"
+            android:gravity="center"
+            android:padding="5dp"
+            android:text="Previous"
+            android:textColor="@color/secondary"
+            app:drawableStartCompat="@drawable/ic_play_back"
+            app:srcCompat="?attr/homeAsUpIndicator" />
+
+        <ImageView
+            android:id="@+id/logo_btn"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_gravity="center"
+            android:layout_margin="11dp"
+            android:adjustViewBounds="true"
+            android:background="@drawable/background_white_square_yellow_frame"
+            android:padding="8dp"
+            android:scaleType="fitXY"
+            app:srcCompat="@drawable/ic_home" />
+
+        <TextView
+            android:id="@+id/forward_btn"
+            android:layout_width="92dp"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical|end"
+            android:layout_marginEnd="16dp"
+            android:background="@color/primary"
+            android:drawablePadding="5dp"
+            android:fontFamily="@font/poppins_medium"
+            android:gravity="center"
+            android:padding="5dp"
+            android:text="Next"
+            android:textColor="@color/white"
+            app:drawableEndCompat="@drawable/ic_play"
+            app:drawableTint="@color/white"
+            app:srcCompat="?attr/homeAsUpIndicator" />
+
+
+    </androidx.appcompat.widget.Toolbar>
+
+</com.bam.codequiz.widgets.Toolbar>
