@@ -3,6 +3,9 @@
 
 ## :scroll: Description
 Learning tool to have a deeper understanding of coroutines. Quiz format, with explanations.
+<br>
+It is the result of trying to learn and playing with coroutines. The real goal would be - if more people contributes - to have a quiz which covers most of the topic, and with it people can learn, practice and test their knowledge while they are on the bus, waiting for someone, etc. And if someone go thorough these questions and answer them correctly / read the correct solutions, she can rest assured that she have a firm grip on the subject.
+
 
 ## :floppy_disk:	Install
 Clone this repository and run it on your android device
@@ -20,3 +23,6 @@ If you have an interesting piece of code, a better explanation, a topic which is
 - more questions, more topics
 - better score calculation
 - showing topic in questions
+
+## :pencil2: Design
+Credits to <a href="https://www.figma.com/@nagatarun">naga tarun</a>
