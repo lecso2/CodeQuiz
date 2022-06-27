@@ -3,7 +3,7 @@
 
 ## :scroll: Description
 Learning tool to have a deeper understanding of coroutines. Quiz format, with explanations.
-<br>
+<br><br>
 It is the result of trying to learn and playing with coroutines. The real goal would be - if more people contributes - to have a quiz which covers most of the topic, and with it people can learn, practice and test their knowledge while they are on the bus, waiting for someone, etc. And if someone go thorough these questions and answer them correctly / read the correct solutions, she can rest assured that she have a firm grip on the subject.
 
 
