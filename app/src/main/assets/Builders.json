@@ -52,37 +52,53 @@
     {
       "id": 4,
       "title": "What will this code print out?",
-      "code": "fun main() {\n\nrunBlocking {\nCoroutineScope(EmptyCoroutineContext).async {\n            delay(1000)\n            println(\"async\")\n        }\nCoroutineScope(EmptyCoroutineContext).launch {\n            delay(2000)\n            println(\"launch\")\n        }\nwithContext(EmptyCoroutineContext) {\n            println(\"withContext\")\n        }\n    }\n    println(\"end\")\n}",
+      "code": "fun main() {\n\n    runBlocking {\n        CoroutineScope(EmptyCoroutineContext).launch {\n            delay(3000)\n            println(\"launch 1\")\n        }\n\n        launch {\n            delay(1000)\n            println(\"launch 2\")\n        }\n\n        launch(Job()) {\n            delay(2000)\n            println(\"launch 3\")\n        }\n\n    }\n    println(\"end\")\n}",
       "answers": [
-        "async\nend",
-        "launch\nend",
-        "withContext\nend",
-        "async\nlaunch\nend",
-        "async\nwithContext\nend",
-        "launch\nwithContext\nend",
-        "async\nlaunch\nwithContext\nend",
+        "compilation error",
+        "launch 1\nend",
+        "launch 2\nend",
+        "launch 3\nend",
+        "launch 1\nlaunch 2\nend",
+        "launch 1\nlaunch 3\nend",
+        "launch 2\nlaunch 3\nend",
+        "launch 1\nlaunch 2\nlaunch 3\nend",
         "end"
       ],
       "correctAnswerNumber": 2,
-      "explanation": "These are coroutine Builders.\n\nrunBlocking: Runs a new coroutine and blocks the current thread interruptibly until its completion. This function should not be used from a coroutine. It is designed to bridge regular blocking code to libraries that are written in suspending style, to be used in main functions and in tests.\nSo, this will wait until the blocking or suspending code runs, but won't wait for anything else.\n\nasync: Creates a coroutine and returns it's future result as an implementation of [Deferred]. It is not blocking, not suspending, but you can call await() on it's result to suspend the code till it returns.\nSince no await() or join() is called, the code won't wait until it runs.\n\nlaunch: Launches a new coroutine without blocking the current thread and returns a reference to the coroutine as a [Job]. \nIt is not blocking, not suspending, so the code won't wait until it runs.\n\nwithContext: Calls the specified suspending block with a given coroutine context, suspends until it completes, and returns the result. Should be called only from a coroutine or a suspend function.\nIt is suspending, so the code will wait until it runs.",
+      "explanation": "runBlocking{}: Runs a new coroutine and blocks the current thread until its completion. \n\nThe launch function is an extension function on the CoroutineScope interface.It launches a new coroutine without blocking the current thread and returns a reference to the coroutine as a Job.\n\nWhen a coroutine is launched in the CoroutineScope of another coroutine, it inherits its context via CoroutineScope.coroutineContext and the Job of the new coroutine becomes a child of the parent coroutine's job.\n\nHowever, this parent-child relation can be explicitly overriden in one of two ways:\n\nWhen a different scope is explicitly specified when launching a coroutine (for example, GlobalScope.launch), then it does not inherit a Job from the parent scope.\n\nWhen a different Job object is passed as the context for the new coroutine (as shown in the example below), then it overrides the Job of the parent scope.In both cases, the launched coroutine is not tied to the scope it was launched from and operates independently.\n\nA parent coroutine always waits for completion of all its children. A parent does not have to explicitly track all the children it launches, and it does not have to use Job.join to wait for them at the end. In this case, the runBlocking is waiting for it's only child and doesn't wait for the other 2 coroutines.",
       "tags": [
         "builders"
       ]
     },
     {
-      "id": 5,
-      "title": "Which one of these statements is true?",
-      "code": "A) all builders are extension functions on CoroutineScope\nB) withContext(){} suspends the current coroutine until it completes\nC) runBlocking{} is advised in production code\nD) launch{} is blocking the current thread",
+      "id": 6,
+      "title": "What will this code print out?",
+      "code": "fun main() = runBlocking {\n    val time = measureTimeMillis {\n        val one = async { doSomethingUsefulOne() }\n        val two = async { doSomethingUsefulTwo() }\n        println(\"The answer is ${one.await() + two.await()}\")\n    }\n    println(\"Completed in $time ms\")\n}\n\nsuspend fun doSomethingUsefulOne(): Int {\n    delay(1000L)\n    return 13\n}\n\nsuspend fun doSomethingUsefulTwo(): Int {\n    delay(1000L)\n    return 29\n}",
       "answers": [
-        "none",
-        "all",
-        "A",
-        "B",
-        "C",
-        "D"
+        "Compilation error",
+        "Runtime error",
+        "The answer is 42\nCompleted in 1000 ms",
+        "The answer is 42\nCompleted in 2000 ms"
       ],
-      "correctAnswerNumber": 3,
-      "explanation": "withContext() {}\n    It is a suspending method which needs a CoroutineScope as parameter. Because it is suspending, the current coroutine will be blocked until it finishes, thus it needs to be called from a CoroutineScope.\n    This method is used to change the context from the current scope, like change Dispatcher.\n\n    runBlocking {}\n    Runs a new coroutine and blocks completion until all of it's child coroutines are completed. This function should not be used from a coroutine. It is designed to bridge regular blocking code to libraries that are written in suspending style, to be used in main functions and in tests.\n\n    launch{}\n    This is an extension function of the CoroutineScope, so it can be called only in a scope. Launches a new coroutine without blocking the current thread and returns a reference to the coroutine as a Job.\n\n    asyn{}\n    This is an extension function of the CoroutineScope, so it can be called only in a scope. Creates a coroutine and returns its future result as an implementation of Deferred.",
+      "correctAnswerNumber": 2,
+      "explanation": "Conceptually, async is just like launch. It starts a separate coroutine which is a light-weight thread that works concurrently with all the other coroutines. The difference is that launch returns a Job and does not carry any resulting value, while async returns a Deferred — a light-weight non-blocking future that represents a promise to provide a result later. You can use .await() on a deferred value to get its eventual result, but Deferred is also a Job, so you can cancel it if needed.\n\nThe two coroutines execute concurrently. Note that concurrency with coroutines is always explicit.",
+      "tags": [
+        "builders"
+      ]
+    },
+    {
+      "id": 7,
+      "title": "What will this code print out?",
+      "code": "fun main() = runBlocking {\n    val time = measureTimeMillis {\n        val one = async(start = CoroutineStart.LAZY) { doSomethingUsefulOne() }\n        val two = async(start = CoroutineStart.LAZY) { doSomethingUsefulTwo() }\n        two.start()\n        println(\"The answer is ${one.await() + two.await()}\")\n    }\n    println(\"Completed in $time ms\")\n}\n\nsuspend fun doSomethingUsefulOne(): Int {\n    delay(1000L)\n    println(\"started\")\n    return 13\n}\n\nsuspend fun doSomethingUsefulTwo(): Int {\n    delay(1000L)\n    return 29\n}",
+      "answers": [
+        "Compilation error",
+        "Runtime error",
+        "The answer is 42\nCompleted in 1000 ms",
+        "The answer is 42\nCompleted in 2000 ms",
+        "It will never finish"
+      ],
+      "correctAnswerNumber": 2,
+      "explanation": "CoroutineStart.LAZY: Starts the coroutine lazily, only when it is needed. The deferred \"two\" is started explicitly, and the deferred \"one\" is needed as the first member in the addition, so they will run in parallel. \n\nIf there is no two.start(), it will complete in 2000 ms.\n\nOther starts:\n\nDEFAULT : immediately schedules the coroutine for execution according to its context\n\nLAZY: Starts the coroutine lazily, only when it is needed.\n\nATOMIC: Atomically (i.e., in a non-cancellable way) schedules the coroutine for execution according to its context. This is similar to DEFAULT, but the coroutine cannot be cancelled before it starts executing.\n\nUNDISPATCHED : Immediately executes the coroutine until its first suspension point in the current thread similarly to the coroutine being started using Dispatchers.Unconfined. However, when the coroutine is resumed from suspension it is dispatched according to the CoroutineDispatcher in its context.\nThis is similar to ATOMIC in the sense that coroutine starts executing even if it was already cancelled, but the difference is that it starts executing in the same thread.",
       "tags": [
         "builders"
       ]

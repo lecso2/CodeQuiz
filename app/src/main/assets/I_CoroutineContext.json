@@ -45,7 +45,7 @@
         "CoroutineName(name2)\nStandaloneCoroutine{Active}@903636a\nDispatchers.Default\nCoroutineExceptionHandler$1@4867957c"
       ],
       "correctAnswerNumber": 3,
-      "explanation": "Because CoroutineContext works like a Map<CoroutineContext.Key, Element> (every Element has a CoroutineContext.Key), adding the same Element that it already has will replace the previous. So the first line will be CoroutineName(name2).\nThe launch() method creates a Job for the coroutine, so the next line will be something like StandaloneCoroutine{Active}@3745d7f8.\nThe launch() method adds the default dispatcher (Dispatcher.Default) to the context, if no Dispatcher is defined (by calling CoroutineScope.newCoroutineContext(context: CoroutineContext)). So the next line will be Dispatchers.Default\nIf the context doesn’t have a CoroutineExceptionHandler, then the global handler is used (but not installed in the context).\nNote: Jobs and Dispatchers can't be added to one another.",
+      "explanation": "Because CoroutineContext works like a Map<CoroutineContext.Key, Element> (every Element has a CoroutineContext.Key), adding the same Element that it already has will replace the previous. So the first line will be CoroutineName(name2).\nThe CoroutineScope creates a Job for the coroutine, so the next line will be something like StandaloneCoroutine{Active}@3745d7f8.\nThe launch() method adds the default dispatcher (Dispatcher.Default) to the context, if no Dispatcher is defined (by calling CoroutineScope.newCoroutineContext(context: CoroutineContext)). So the next line will be Dispatchers.Default\nIf the context doesn’t have a CoroutineExceptionHandler, then the global handler is used (but not installed in the context).\nNote: Jobs and Dispatchers can't be added to one another.",
       "tags": [
         "coroutineScope"
       ]
@@ -107,7 +107,7 @@
         "Hello\nWorld!"
       ],
       "correctAnswerNumber": 3,
-      "explanation": "As in the previous code, the CoroutineScope is inherited, only the CoroutineName is overridden, so the job in launcy{} will be the child of the runBlocking's.",
+      "explanation": "As in the previous code, the CoroutineScope is inherited, only the CoroutineName is overridden, so the job in launch{} will be the child of the runBlocking's.",
       "tags": [
         "coroutineScope"
       ]
@@ -123,7 +123,7 @@
         "Hello\nWorld!"
       ],
       "correctAnswerNumber": 0,
-      "explanation": "As in the previous code, the CoroutineScope is inherited, but this time the Job is overriden, so the lanuch{}'s Job won't be the child of the runBlocking's Job and it won't block until it finishes.",
+      "explanation": "As in the previous code, the CoroutineScope is inherited, but this time the Job is overridden, so the lanuch{}'s Job won't be the child of the runBlocking's Job and it won't block until it finishes.",
       "tags": [
         "coroutineScope"
       ]
@@ -162,31 +162,36 @@
     },
     {
       "id": 10,
-      "title": "What will this code print out?",
-      "code": "",
+      "title": "What will be the output when you run this code ?",
+      "code": "fun main() = runBlocking {\n    doWorld()\n    println(\"Hello\")\n}\n\nsuspend fun doWorld() = coroutineScope {\n    launch {\n        println(\"!\")\n    }\n    yield()\n    println(\"World\")\n}",
       "answers": [
         "Compilation error",
         "Runtime error",
-        "null",
-        "StandaloneCoroutine{Active}@42f93a98"
+        "Hello\nWorld\n!",
+        "Hello\n!\nWorld",
+        "World\nHello\n!",
+        "World\n!\nHello",
+        "!\nHello\nWorld",
+        "!\nWorld\nHello"
       ],
-      "correctAnswerNumber": 0,
-      "explanation": "CoroutineContext is the class (capital C), you can get the current context with coroutineContext (small c).",
+      "correctAnswerNumber": 7,
+      "explanation": "CoroutineScope builder creates a coroutine scope and does not complete until all launched children complete. You can use coroutineScope from any suspending function.In this example the methods in main runs sequentially, so \"Hello\" will be printed out after doWorld finishes.coroutineScope{} launches \"!\" concurrently, so both \"!\" and \"World\" could be the first, but yield{} gives the control (coroutine dispatcher's attention) to the other coroutine, so \"!\" will win.",
       "tags": [
         "coroutineScope"
       ]
     },
     {
-      "id": 9,
-      "title": "How many Dispatchers can you have on Android?",
-      "code": "",
+      "id": 11,
+      "title": "What will be the output when you run this code ?",
+      "code": "fun main() = runBlocking {\n    doWorld()\n    println(\"Hello\")\n}\n\nsuspend fun doWorld() = coroutineScope {\n    launch {\n        delay(100)\n        println(\"!\")\n    }\n    launch {\n        println(\"!!\")\n    }\n\n    yield()\n    println(\"World\")\n}",
       "answers": [
-        "3",
-        "4",
-        "5"
+        "Compilation error",
+        "Runtime error",
+        "!!\nWorld\n!\nHello",
+        "\n!!\n!\nWorld\nHello"
       ],
-      "correctAnswerNumber": 1,
-      "explanation": "Dispatchers.Default: The default threading strategy for starting coroutines, confined to the parent’s context, usually a thread pool of workers.\n\n Dispatchers.IO: Similar to Default, it’s based on the JVM, and is backed by a thread pool to offload IO-related tasks.\n\n Dispatchers.Main: The main thread dispatcher, connected to the thread, which operates with UI objects.\n\n Dispatchers.Unconfined: The name states it, it’s unconfined, and it will run on whichever thread is currently using it ",
+      "correctAnswerNumber": 2,
+      "explanation": "It is like the previous, but after yield{}, \"!\" has a delay{}, so \"!!\" will be the first, and while \"!\" is delayed, the \"World\" will have the control (coroutine dispatcher's attention) again.",
       "tags": [
         "coroutineScope"
       ]

@@ -83,7 +83,7 @@
         "Compilation error"
       ],
       "correctAnswerNumber": 3,
-      "explanation": "There is no terminal operator this time, so the answer is (a misleading) Compilation error : Error running YourClass.kt: Class YourClassKt not found in module YourModule",
+      "explanation": "There is no terminal operator this time, so the answer is (a misleading) Compilation error : Error running YourClass.kt: Class YourClassKt not found in module YourModule. If you put a println() to the end, it will run but do nothing.",
       "tags": [
         "flow operators I"
       ],

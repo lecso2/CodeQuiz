@@ -26,7 +26,7 @@
         "Hello\nWorld!",
         "World!\nHello"
       ],
-      "correctAnswerNumber": 1,
+      "correctAnswerNumber": 0,
       "explanation": "delay{} is a suspend function, so the function should be a suspend function.",
       "tags": [
         "basics"
@@ -35,43 +35,7 @@
     {
       "id": 3,
       "title": "What will be the output when you run this code ?",
-      "code": "fun main() = runBlocking {\n    doWorld()\n    println(\"Hello\")\n}\n\nsuspend fun doWorld() = coroutineScope {\n    launch {\n        println(\"!\")\n    }\n    yield()\n    println(\"World\")\n}",
-      "answers": [
-        "Compilation error",
-        "Runtime error",
-        "Hello\nWorld\n!",
-        "Hello\n!\nWorld",
-        "World\nHello\n!",
-        "World\n!\nHello",
-        "!\nHello\nWorld",
-        "!\nWorld\nHello"
-      ],
-      "correctAnswerNumber": 7,
-      "explanation": "runBlocking{} and coroutineScope{} builders may look similar because they both wait for their body and all its children to complete. The main difference is that the runBlocking method blocks the current thread for waiting, while coroutineScope just suspends, releasing the underlying thread for other usages. Because of that difference, runBlocking is a regular function and coroutineScope is a suspending function.\n\nIn this example runBlocking will block until doWorld() finishes, so \"Hello\" will be print out last. coroutineScope{} launches \"!\" concurrently, so both \"!\" and \"World\" could be the first, but yield{} gives the control (coroutine dispatcher's attention) to the other coroutine, so \"!\" will win.",
-      "tags": [
-        "basics"
-      ]
-    },
-    {
-      "id": 4,
-      "title": "What will be the output when you run this code ?",
-      "code": "fun main() = runBlocking {\n    doWorld()\n    println(\"Hello\")\n}\n\nsuspend fun doWorld() = coroutineScope {\n    launch {\n        delay(100)\n        println(\"!\")\n    }\n    launch {\n        println(\"!!\")\n    }\n\n    yield()\n    println(\"World\")\n}",
-      "answers": [
-        "Compilation error",
-        "Runtime error",
-        "!!\nWorld\n!\nHello",
-        "\n!!\n!\nWorld\nHello"
-      ],
-      "correctAnswerNumber": 2,
-      "explanation": "It is like the previous, but after yield{}, \"!\" has a delay{}, so \"!!\" will be the first, and while \"!\" is delayed, the \"World\" will have the control (coroutine dispatcher's attention) .",
-      "tags": [
-        "basics"
-      ]
-    },
-    {
-      "id": 5,
-      "title": "What will be the output when you run this code ?",
-      "code": "fun main() = runBlocking {\n    repeat(100_000) { // launch a lot of coroutines\n        launch {\n            delay(5000L)\n            print(\".\")\n        }\n    }\n}",
+      "code": "fun main() = runBlocking {\n    repeat(100_000) {\n        launch {\n            delay(5000L)\n            print(\".\")\n        }\n    }\n}",
       "answers": [
         "Compilation error",
         "StackOverflowError",
@@ -87,7 +51,7 @@
       ]
     },
     {
-      "id": 6,
+      "id": 4,
       "title": "What will be the output when you run this code ?",
       "code": "fun main() = runBlocking {\n    val time = measureTimeMillis {\n        val one = doSomethingUsefulOne()\n        val two = doSomethingUsefulTwo()\n        println(\"The answer is ${one + two}\")\n    }\n    println(\"Completed in $time ms\")\n}\n\nsuspend fun doSomethingUsefulOne(): Int {\n    delay(1000L)\n    println(\"first\")\n    return 13\n}\n\nsuspend fun doSomethingUsefulTwo(): Int {\n    delay(1000L)\n    println(\"second\")\n    return 29\n}",
       "answers": [
@@ -106,7 +70,7 @@
       ]
     },
     {
-      "id": 7,
+      "id": 5,
       "title": "What is structured concurrency ?",
       "code": "",
       "answers": [
@@ -115,6 +79,21 @@
       ],
       "correctAnswerNumber": 0,
       "explanation": "\"Structured concurrency\" refers to a way to structure async/concurrent computations so that child operations are guaranteed to complete before their parents, i.e. no child operation is executed outside the scope of a parent operation.",
+      "tags": [
+        "basics"
+      ]
+    },
+    {
+      "id": 6,
+      "title": "How many Dispatchers can you have on Android?",
+      "code": "",
+      "answers": [
+        "3",
+        "4",
+        "5"
+      ],
+      "correctAnswerNumber": 1,
+      "explanation": "Dispatchers.Default: The default threading strategy for starting coroutines, confined to the parent’s context, usually a thread pool of workers.\n\n Dispatchers.IO: Similar to Default, it’s based on the JVM, and is backed by a thread pool to offload IO-related tasks.\n\n Dispatchers.Main: The main thread dispatcher, connected to the thread, which operates with UI objects.\n\n Dispatchers.Unconfined: The name states it, it’s unconfined, and it will run on whichever thread is currently using it ",
       "tags": [
         "basics"
       ]
