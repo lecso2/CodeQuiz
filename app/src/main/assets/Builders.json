@@ -89,7 +89,7 @@
     {
       "id": 7,
       "title": "What will this code print out?",
-      "code": "fun main() = runBlocking {\n    val time = measureTimeMillis {\n        val one = async(start = CoroutineStart.LAZY) { doSomethingUsefulOne() }\n        val two = async(start = CoroutineStart.LAZY) { doSomethingUsefulTwo() }\n        two.start()\n        println(\"The answer is ${one.await() + two.await()}\")\n    }\n    println(\"Completed in $time ms\")\n}\n\nsuspend fun doSomethingUsefulOne(): Int {\n    delay(1000L)\n    println(\"started\")\n    return 13\n}\n\nsuspend fun doSomethingUsefulTwo(): Int {\n    delay(1000L)\n    return 29\n}",
+      "code": "fun main() = runBlocking {\n    val time = measureTimeMillis {\n        val one = async(start = CoroutineStart.LAZY) { doSomethingUsefulOne() }\n        val two = async(start = CoroutineStart.LAZY) { doSomethingUsefulTwo() }\n        two.start()\n        println(\"The answer is ${one.await() + two.await()}\")\n    }\n    println(\"Completed in $time ms\")\n}\n\nsuspend fun doSomethingUsefulOne(): Int {\n    delay(1000L)\n    return 13\n}\n\nsuspend fun doSomethingUsefulTwo(): Int {\n    delay(1000L)\n    return 29\n}",
       "answers": [
         "Compilation error",
         "Runtime error",
