@@ -77,8 +77,8 @@
       "answers": [
         "Compilation error",
         "Runtime error",
-        "The answer is 42\nCompleted in 1000 ms",
-        "The answer is 42\nCompleted in 2000 ms"
+        "after async\nThe answer is 42\nCompleted in 1000 ms",
+        "after async\nThe answer is 42\nCompleted in 2000 ms"
       ],
       "correctAnswerNumber": 2,
       "explanation": "Conceptually, async is just like launch. It starts a separate coroutine which is a light-weight thread that works concurrently with all the other coroutines. The difference is that launch returns a Job and does not carry any resulting value, while async returns a Deferred — a light-weight non-blocking future that represents a promise to provide a result later. You can use .await() on a deferred value to get its eventual result, but Deferred is also a Job, so you can cancel it if needed.\n\nThe two coroutines execute concurrently. Note that concurrency with coroutines is always explicit.",
@@ -89,7 +89,7 @@
     {
       "id": 7,
       "title": "What will this code print out?",
-      "code": "fun main() = runBlocking {\n    val time = measureTimeMillis {\n        val one = async(start = CoroutineStart.LAZY) { doSomethingUsefulOne() }\n        val two = async(start = CoroutineStart.LAZY) { doSomethingUsefulTwo() }\n        two.start()\n        println(\"The answer is ${one.await() + two.await()}\")\n    }\n    println(\"Completed in $time ms\")\n}\n\nsuspend fun doSomethingUsefulOne(): Int {\n    delay(1000L)\n    return 13\n}\n\nsuspend fun doSomethingUsefulTwo(): Int {\n    delay(1000L)\n    return 29\n}",
+      "code": "fun main() = runBlocking {\n    val time = measureTimeMillis {\n        val one = async(start = CoroutineStart.LAZY) { doSomethingUsefulOne() }\n        val two = async(start = CoroutineStart.LAZY) { doSomethingUsefulTwo() }\n        two.start()\n        println(\"The answer is ${one.await() + two.await()}\")\n    }\n    println(\"Completed in $time ms\")\n}\n\nsuspend fun doSomethingUsefulOne(): Int {\n    delay(1000L)\n   return 13\n}\n\nsuspend fun doSomethingUsefulTwo(): Int {\n    delay(1000L)\n    return 29\n}",
       "answers": [
         "Compilation error",
         "Runtime error",

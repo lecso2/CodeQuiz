@@ -3,7 +3,7 @@
     {
       "id": 1,
       "title": "What will be the output when you run this code ?",
-      "code": "fun main() = runBlocking {\n    val startTime = getTime()\n\n    val job = launch(Dispatchers.Default) {\n        var nextPrintTime = startTime\n        var count = 0\n\n        while (count < 5) {\n            if (getTime() >= nextPrintTime) {\n                print(count)\n                count++\n                nextPrintTime += 500L\n            }\n        }\n    }\n\n    delay(1000L)\n    println(\"main: I'm tired of waiting!\")\n    job.cancelAndJoin()\n    println(\"main: Now I can quit.\")\n}\n\nfun getTime() = System.currentTimeMillis()\n\nfun print(count: Int) = println(\"job: I'm sleeping $count ...\")",
+      "code": "fun main() = runBlocking {\n\n    val job = launch(Dispatchers.Default) {\n        var count = 0\n\n        while (count < 5) {\n            Thread.sleep(500)\n            print(count)\n            count++\n        }\n    }\n\n    delay(1000L)\n    println(\"main: I'm tired of waiting!\")\n    job.cancelAndJoin()\n    println(\"main: Now I can quit.\")\n}\n\nfun print(count: Int) = println(\"job: I'm sleeping $count ...\")",
       "answers": [
         "Compilation error",
         "Runtime error",
@@ -22,7 +22,7 @@
     {
       "id": 2,
       "title": "What will be the output when you run this code?",
-      "code": "fun main() = runBlocking {\n    val job = launch {\n        repeat(1000) { i ->\n            println(\"job: I'm sleeping $i ...\")\n            delay(500L)\n        }\n    }\n    delay(1300L)\n    println(\"main: I'm tired of waiting!\")\n    job.cancel()\n    job.join()\n    println(\"main: Now I can quit.\")\n}",
+      "code": "fun main() = runBlocking {\n\n    val job = launch(Dispatchers.Default) {\n        var count = 0\n\n        while (count < 5) {\n            delay(500)\n            print(count)\n            count++\n        }\n    }\n\n    delay(1000L)\n    println(\"main: I'm tired of waiting!\")\n    job.cancelAndJoin()\n    println(\"main: Now I can quit.\")\n}\n\nfun print(count: Int) = println(\"job: I'm sleeping $count ...\")",
       "answers": [
         "Compilation error",
         "Runtime error",
@@ -39,7 +39,7 @@
     {
       "id": 3,
       "title": "What will be the output when you run this code?",
-      "code": "fun main() = runBlocking {\n    val startTime = getTime()\n\n    val job = launch(Dispatchers.Default) {\n        var nextPrintTime = startTime\n        var count = 0\n\n        while (isActive || count < 5) {\n            if (getTime() >= nextPrintTime) {\n                print(count)\n                count++\n                nextPrintTime += 500L\n            }\n        }\n    }\n\n    delay(1000L)\n    println(\"main: I'm tired of waiting!\")\n    job.cancelAndJoin()\n    println(\"main: Now I can quit.\")\n}\n\nfun getTime() = System.currentTimeMillis()\n\nfun print(count: Int) = println(\"job: I'm sleeping $count ...\")",
+      "code": "fun main() = runBlocking {\n\n    val job = launch(Dispatchers.Default) {\n        var count = 0\n\n        while (count < 5 || isActive) {\n            Thread.sleep(500)\n            print(count)\n            count++\n        }\n    }\n\n    delay(1000L)\n    println(\"main: I'm tired of waiting!\")\n    job.cancelAndJoin()\n    println(\"main: Now I can quit.\")\n}\n\nfun print(count: Int) = println(\"job: I'm sleeping $count ...\")",
       "answers": [
         "Compilation error",
         "Runtime error",
@@ -56,13 +56,13 @@
     {
       "id": 4,
       "title": "What will be the output when you run this code?",
-      "code": "fun main() = runBlocking {\n    val job = launch {\n        try {\n            repeat(1000) { i ->\n                print(i)\n                delay(500L)\n            }\n        } finally {\n            println(\"job: I'm running finally\")\n        }\n    }\n    delay(1300L) // delay a bit\n    println(\"main: I'm tired of waiting!\")\n    job.cancelAndJoin() // cancels the job and waits for its completion\n    println(\"main: Now I can quit.\")\n}\n\nfun print(count: Int) = println(\"job: I'm sleeping $count ...\")",
+      "code": "fun main() = runBlocking {\n\n    val job = launch {\n        try {\n            repeat(1000) { i ->\n                print(i)\n                delay(500L)\n            }\n        } finally {\n            println(\"job: finally\")\n        }\n    }\n\n    delay(1300L)\n    println(\"main: I'm tired of waiting!\")\n    job.cancelAndJoin()\n    println(\"main: Now I can quit.\")\n}\n\nfun print(count: Int) = println(\"job: I'm sleeping $count ...\")",
       "answers": [
         "Compilation error",
         "Runtime error",
         "job: I'm sleeping 0 ...\njob: I'm sleeping 1 ...\njob: I'm sleeping 2 ...\nmain: I'm tired of waiting!\nmain: Now I can quit.",
-        "job: I'm sleeping 0 ...\njob: I'm sleeping 1 ...\njob: I'm sleeping 2 ...\nmain: I'm tired of waiting!\njob: I'm running finally\nmain: Now I can quit.",
-        "job: I'm sleeping 0 ...\njob: I'm sleeping 1 ...\njob: I'm sleeping 2 ...\nmain: I'm tired of waiting!\nmain: Now I can quit.\njob: I'm running finally"
+        "job: I'm sleeping 0 ...\njob: I'm sleeping 1 ...\njob: I'm sleeping 2 ...\nmain: I'm tired of waiting!\njob: finally\nmain: Now I can quit.",
+        "job: I'm sleeping 0 ...\njob: I'm sleeping 1 ...\njob: I'm sleeping 2 ...\nmain: I'm tired of waiting!\nmain: Now I can quit.\njob: finally"
       ],
       "correctAnswerNumber": 3,
       "explanation": "Cancellable suspending functions throw CancellationException on cancellation which can be handled in the usual way. For example, try {...} finally {...} expression and Kotlin use function execute their finalization actions normally when a coroutine is cancelled. Both join and cancelAndJoin wait for all finalization actions to complete.",
@@ -74,7 +74,7 @@
     {
       "id": 5,
       "title": "What will be the output when you run this code?",
-      "code": "fun main() = runBlocking {\n\n    val job = launch {\n        try {\n            println(\"job is working\")\n            delay(5000L)\n        } finally {\n            closeResources()\n        }\n    }\n\n    delay(1300L)\n    println(\"main: I'm tired of waiting!\")\n    job.cancelAndJoin()\n    println(\"main: Now I can quit.\")\n}\n\nsuspend fun closeResources() = withContext(Dispatchers.IO) {\n    println(\"closing resources\")\n}",
+      "code": "fun main() = runBlocking {\n    \n    val job = launch {\n        try {\n            println(\"job is working\")\n            delay(5000L)\n        } finally {\n            closeResources()\n        }\n    }\n    \n    delay(1300L)\n    println(\"main: I'm tired of waiting!\")\n    job.cancelAndJoin()\n    println(\"main: Now I can quit.\")\n}\n\nsuspend fun closeResources() = withContext(Dispatchers.IO) {\n    println(\"closing resources\")\n}",
       "answers": [
         "Compilation error",
         "Runtime error",
@@ -91,7 +91,7 @@
     {
       "id": 6,
       "title": "What will be the output when you run this code?",
-      "code": "fun main() = runBlocking {\n\n    val job = launch {\n        try {\n            println(\"job is working\")\n            delay(5000L)\n        } finally {\n            closeResources()\n        }\n    }\n\n    delay(1300L)\n    println(\"main: I'm tired of waiting!\")\n    job.cancelAndJoin()\n    println(\"main: Now I can quit.\")\n}\n\nsuspend fun closeResources() = withContext(NonCancellable) {\n    println(\"closing resources\")\n}",
+      "code": "fun main() = runBlocking {\n    \n    val job = launch {\n        try {\n            println(\"job is working\")\n            delay(5000L)\n        } finally {\n            closeResources()\n        }\n    }\n    \n    delay(1300L)\n    println(\"main: I'm tired of waiting!\")\n    job.cancelAndJoin()\n    println(\"main: Now I can quit.\")\n}\n\nsuspend fun closeResources() = withContext(NonCancellable) {\n    println(\"closing resources\")\n}",
       "answers": [
         "Compilation error",
         "Runtime error",
@@ -113,7 +113,7 @@
         "Compilation error",
         "Runtime error",
         "I'm sleeping 0 ...\nI'm sleeping 1 ...\nI'm sleeping 2 ...",
-        "I'm sleeping 0 ...\nI'm sleeping 1 ...\nI'm sleeping 2 ...\nException in thread \"main\" kotlinx.coroutines.TimeoutCancellationException: Timed out waiting for 1300 ms"
+        "I'm sleeping 0 ...\nI'm sleeping 1 ...\nI'm sleeping 2 ...\nException in thread \"main\" TimeoutCancellationException: Timed out waiting for 1300 ms"
       ],
       "correctAnswerNumber": 3,
       "explanation": "The TimeoutCancellationException that is thrown by withTimeout is a subclass of CancellationException. We have not seen its stack trace printed on the console before. That is because inside a cancelled coroutine CancellationException is considered to be a normal reason for coroutine completion. However, in this example we have used withTimeout right inside the main function.",
@@ -125,7 +125,7 @@
     {
       "id": 8,
       "title": "What will be the output when you run this code?",
-      "code": "fun main() = runBlocking {\n    \n    val result = withTimeoutOrNull(1300L) {\n        repeat(5) { i ->\n            print(i)\n            delay(500L)\n        }\n        \"Done\"\n    }\n    println(\"Result is $result\")\n}",
+      "code": "fun main() = runBlocking {\n    val result = withTimeoutOrNull(1300L) {\n        repeat(5) { i ->\n            print(i)\n            delay(500L)\n        }\n        \"Done\"\n    }\n    println(\"Result is $result\")\n}",
       "answers": [
         "Compilation error",
         "Runtime error",

@@ -183,7 +183,7 @@
     {
       "id": 11,
       "title": "What will be the output when you run this code ?",
-      "code": "fun main() = runBlocking {\n    doWorld()\n    println(\"Hello\")\n}\n\nsuspend fun doWorld() = coroutineScope {\n    launch {\n        delay(100)\n        println(\"!\")\n    }\n    launch {\n        println(\"!!\")\n    }\n\n    yield()\n    println(\"World\")\n}",
+      "code": "fun main() = runBlocking {\n    doWorld()\n    println(\"Hello\")\n}\n\nsuspend fun doWorld() = coroutineScope {\n    launch {\n        delay(100)\n        println(\"!\")\n    }\n    launch {\n        println(\"!!\")\n    }\n\n    yield()\n    println(\"World\")\n    delay(1000)\n}",
       "answers": [
         "Compilation error",
         "Runtime error",
