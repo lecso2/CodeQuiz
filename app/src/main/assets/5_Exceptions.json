@@ -3,16 +3,15 @@
     {
       "id": 1,
       "title": "What will be the output when you run this code ?",
-      "code": "fun main() = runBlocking {\n    val job = CoroutineScope(EmptyCoroutineContext).launch {\n        println(\"Throwing exception from launch\")\n        throw IndexOutOfBoundsException()\n    }\n    job.join()\n    println(\"after launch\")\n\n    val deferred = CoroutineScope(EmptyCoroutineContext).async {\n        println(\"Throwing exception from async\")\n        throw ArithmeticException()\n    }\n    deferred.await()\n    println(\"after await\")\n}",
+      "code": "fun main() = runBlocking {\n    val scope = CoroutineScope(EmptyCoroutineContext)\n\n    val job = scope.launch {\n        println(\"throwing exception\")\n        throw IndexOutOfBoundsException()\n    }\n\n    job.join()\n    println(\"main method continues\")\n}",
       "answers": [
-        "Throwing exception from launch\nException in thread \"DefaultDispatcher-worker-1\" java.lang.IndexOutOfBoundsException",
-        "Throwing exception from launch\nafter launch\nThrowing exception from async\nException in thread \"main\" java.lang.ArithmeticException",
-        "Throwing exception from launch\nafter launch\nThrowing exception from async\nafter await",
-        "Throwing exception from launch\nafter launch\nThrowing exception from async\nException in thread \"DefaultDispatcher-worker-1\" java.lang.IndexOutOfBoundsException\nException in thread \"main\" java.lang.ArithmeticException",
-        "Throwing exception from launch\nafter launch\nThrowing exception from async\nafter await\nException in thread \"DefaultDispatcher-worker-1\" java.lang.IndexOutOfBoundsException\nException in thread \"main\" java.lang.ArithmeticException"
+        "Compilation error",
+        "throwing exception\nmain method continues",
+        "throwing exception\nmain method continues\nException in thread \"DefaultDispatcher-worker-1\" java.lang.IndexOutOfBoundsException",
+        "throwing exception\nException in thread \"DefaultDispatcher-worker-1\" java.lang.IndexOutOfBoundsException"
       ],
-      "correctAnswerNumber": 3,
-      "explanation": "Coroutine builders come in two flavors: propagating exceptions automatically (launch) or exposing them to users (async). When these builders are used to create a root coroutine, that is not a child of another coroutine (meaning it's job in the context is not a child of any others), launch{} treats exceptions as uncaught exceptions, similar to Java's Thread.uncaughtExceptionHandler, meaning it will print out the exception, but it doesn't crash. async{} relying on the user to consume the final exception, for example via await, meaning it will cause a crash.This is why both exceptions will be printed out, also \"after launch\", but not \"after await\".",
+      "correctAnswerNumber": 2,
+      "explanation": "Coroutine builders come in two flavors: propagating exceptions automatically (launch) or exposing them to users (async). When these builders are used to create a root coroutine, that is not a child of another coroutine (meaning it's job in the context is not a child of any others), launch{} treats exceptions as uncaught exceptions, similar to Java's Thread.uncaughtExceptionHandler, meaning it will print out the exception, but it doesn't crash. So the Exception will be printed out, and \"main method continues\" as well.",
       "tags": [
         "exceptions"
       ]
@@ -20,7 +19,24 @@
     {
       "id": 2,
       "title": "What will be the output when you run this code ?",
-      "code": "fun main() = runBlocking {\n    CoroutineScope(EmptyCoroutineContext).launch {\n        println(\"before\")\n        val job = coroutineContext.job\n        CoroutineScope(job).launch {\n            println(\"throwing\")\n            throw IllegalArgumentException(\"this is an exception\")\n        }\n        delay(100)\n        println(\"after\")\n    }\n    delay(200)\n    println(\"ending\")\n}",
+      "code": "fun main() = runBlocking {\n    val scope = CoroutineScope(EmptyCoroutineContext)\n\n    val deferred = scope.async {\n        println(\"throwing exception\")\n        throw ArithmeticException()\n    }\n\n    deferred.await()\n    println(\"main method continues\")\n}",
+      "answers": [
+        "Compilation error",
+        "throwing exception\nmain method continues",
+        "throwing exception\nmain method continues\nException in thread \"main\" java.lang.ArithmeticException",
+        "throwing exception\nException in thread \"main\" java.lang.ArithmeticException",
+        "throwing exception\nException in thread \"main\" java.lang.ArithmeticException\nmain method continues"
+      ],
+      "correctAnswerNumber": 3,
+      "explanation": "Coroutine builders come in two flavors: propagating exceptions automatically (launch) or exposing them to users (async). When these builders are used to create a root coroutine, that is not a child of another coroutine (meaning it's job in the context is not a child of any others). Async{} relying on the user to consume the final exception, for example via await, meaning it will cause a crash.So the Exception will be printed out, but not \"main method continues\".",
+      "tags": [
+        "exceptions"
+      ]
+    },
+    {
+      "id": 3,
+      "title": "What will be the output when you run this code ?",
+      "code": "fun main() = runBlocking {\n    val scope = CoroutineScope(EmptyCoroutineContext)\n\n    scope.launch {\n        println(\"before\")\n        val job = coroutineContext.job\n        CoroutineScope(job).launch {\n            println(\"throwing\")\n            throw IllegalArgumentException(\"this is an exception\")\n        }\n        delay(100)\n        println(\"after\")\n    }\n\n    delay(200)\n    println(\"ending\")\n}",
       "answers": [
         "before\nthrowing\nException in thread \"DefaultDispatcher-worker-1\" java.lang.IllegalArgumentException: this is an exception ...",
         "before\nthrowing\nException in thread \"DefaultDispatcher-worker-2\" java.lang.IllegalArgumentException: this is an exception ...",
@@ -38,24 +54,24 @@
       ]
     },
     {
-      "id": 3,
+      "id": 4,
       "title": "What will be the output when you run this code ?",
-      "code": "fun main() = runBlocking {\n    val deferred = CoroutineScope(EmptyCoroutineContext).async {\n        println(\"Throwing exception from async\")\n        throw ArithmeticException()\n    }\n    try {\n        deferred.await()\n        println(\"Await ended\")\n    } catch (e: ArithmeticException) {\n        println(\"Caught exception :$e\")\n    }\n}",
+      "code": "fun main() = runBlocking {\n    val scope = CoroutineScope(EmptyCoroutineContext)\n\n    val deferred = scope.async {\n        println(\"throwing exception from async\")\n        throw ArithmeticException()\n    }\n    try {\n        deferred.await()\n        println(\"Await ended\")\n    } catch (e: ArithmeticException) {\n        println(\"Caught exception :$e\")\n    }\n}",
       "answers": [
         "Compilation error",
-        "Throwing exception from async\njava.lang.ArithmeticException",
-        "Throwing exception from async\njava.lang.ArithmeticException\nAwait ended",
-        "Throwing exception from async\nCaught exception :java.lang.ArithmeticException",
-        "Throwing exception from async\nAwait ended\nCaught exception :java.lang.ArithmeticException"
+        "throwing exception from async\njava.lang.ArithmeticException",
+        "throwing exception from async\njava.lang.ArithmeticException\nAwait ended",
+        "throwing exception from async\nCaught exception :java.lang.ArithmeticException",
+        "throwing exception from async\nAwait ended\nCaught exception :java.lang.ArithmeticException"
       ],
-      "correctAnswerNumber": 2,
+      "correctAnswerNumber": 3,
       "explanation": "The coroutine is a root coroutine, meaning it's job in the context is not a child of any others. Async relies on the user to consume the exception, for example via await or receive. Here the exception will appear in the deferred.await() line, and handled by the try-catch block. The 'Await ended' line won't be reached.",
       "tags": [
         "exceptions"
       ]
     },
     {
-      "id": 4,
+      "id": 5,
       "title": "What will be the output when you run this code ?",
       "code": "fun main() = runBlocking {\n    val context1 = createHandler(\"Handler_1\")\n    val context2 = createHandler(\"Handler_2\")\n    val context3 = createHandler(\"Handler_3\")\n\n    val job = CoroutineScope(context1).launch {\n        launch(context2) {\n            launch(context3) {\n                throw IllegalArgumentException()\n            }\n        }\n    }\n\n    job.join()\n}\n\nfun createHandler(msg: String) =\n    CoroutineExceptionHandler { _, exception ->\n        println(\"$msg got $exception\")\n    }",
       "answers": [
@@ -71,7 +87,7 @@
       ]
     },
     {
-      "id": 5,
+      "id": 6,
       "title": "What will be the output when you run this code ?",
       "code": "fun main() = runBlocking {\n    val handler = CoroutineExceptionHandler { _, exception ->\n        println(\"CoroutineExceptionHandler got $exception\")\n    }\n    val job = GlobalScope.launch(handler) { \n        throw AssertionError()\n    }\n    val deferred = GlobalScope.async(handler) { \n        throw ArithmeticException() \n    }\n    joinAll(job, deferred)\n}",
       "answers": [
@@ -87,7 +103,7 @@
       ]
     },
     {
-      "id": 6,
+      "id": 7,
       "title": "What will be the output when you run this code (most probably) ?",
       "code": "fun main() = runBlocking {\n    val context1 = EmptyCoroutineContext + createHandler(\"Handler_1\")\n    val context2 = createHandler(\"Handler_2\")\n\n    val job = CoroutineScope(context1).launch {\n        try {\n            launch(context2) {\n                    throw IllegalArgumentException()\n            }\n        } catch (e: IllegalArgumentException) {\n            println(\"caught IAE: $e\")\n        } catch (e: CancellationException) {\n            println(\"caught CE: $e\")\n        } catch (t: Throwable) {\n            println(\"caught other: $t\")\n        }\n    }\n    job.join()\n}\n\nfun createHandler(msg: String) =\n    CoroutineExceptionHandler { _, exception ->\n        println(\"$msg got $exception\")\n    }",
       "answers": [
@@ -104,7 +120,7 @@
       ]
     },
     {
-      "id": 7,
+      "id": 8,
       "title": "What will be the output when you run this code (most probably) ?",
       "code": "fun main() = runBlocking {\n    val context1 = EmptyCoroutineContext + createHandler(\"Handler_1\")\n    val context2 = createHandler(\"Handler_2\")\n\n    val job = CoroutineScope(context1).launch {\n        try {\n            launch(context2) {\n                    throw IllegalArgumentException()\n            }\n            yield()\n        } catch (e: IllegalArgumentException) {\n            println(\"caught IAE: $e\")\n        } catch (e: CancellationException) {\n            println(\"caught CE: $e\")\n        } catch (t: Throwable) {\n            println(\"caught other: $t\")\n        }\n    }\n    job.join()\n}\n\nfun createHandler(msg: String) =\n    CoroutineExceptionHandler { _, exception ->\n        println(\"$msg got $exception\")\n    }",
       "answers": [
@@ -121,7 +137,7 @@
       ]
     },
     {
-      "id": 8,
+      "id": 9,
       "title": "What will be the output when you run this code ?",
       "code": "fun main() = runBlocking {\n    val job = launch {\n        val child = launch {\n            try {\n                delay(Long.MAX_VALUE)\n            } catch (e: Exception) {\n                println(\"caught: $e\")\n            } finally {\n                println(\"Child is cancelled\")\n            }\n        }\n        yield()\n        println(\"Cancelling child\")\n        child.cancel()\n        child.join()\n        yield()\n        println(\"Parent is not cancelled\")\n    }\n    job.join()\n}",
       "answers": [
@@ -138,14 +154,14 @@
       ]
     },
     {
-      "id": 9,
+      "id": 10,
       "title": "What will be the output when you run this code ?",
-      "code": "fun main() = runBlocking {\n    val handler = CoroutineExceptionHandler { _, exception ->\n        println(\"CoroutineExceptionHandler got $exception\")\n    }\n    val job = GlobalScope.launch(handler) {\n        launch {\n            try {\n                delay(Long.MAX_VALUE)\n            } finally {\n                withContext(NonCancellable) {\n                    println(\"Children are cancelled\")\n                    delay(100)\n                    println(\"The first child finished its non cancellable block\")\n                }\n            }\n        }\n        launch {\n            delay(10)\n            println(\"Second child throws an exception\")\n            throw ArithmeticException()\n        }\n    }\n    job.join()\n}",
+      "code": "fun main() = runBlocking {\n    val handler = createHandler()\n    val job = GlobalScope.launch(handler) {\n\n        launch {\n            try {\n                delay(Long.MAX_VALUE)\n            } finally {\n              withContext(NonCancellable) {\n                 delay(100)\n                 println(\"First Finished\")\n              }\n            }\n        }\n\n        launch {\n            delay(10)\n            println(\"Second throws an exception\")\n            throw ArithmeticException()\n        }\n    }\n    job.join()\n}\n\nfun createHandler() =\n    CoroutineExceptionHandler { _, exception ->\n        println(\"CoroutineExceptionHandler got $exception\")\n    }",
       "answers": [
         "Compilation error",
-        "it never finishes after printing: Second child throws an exception",
-        "Second child throws an exception\nCoroutineExceptionHandler got java.lang.ArithmeticException\nThe first child finished its non cancellable block",
-        "Second child throws an exception\nThe first child finished its non cancellable block\nCoroutineExceptionHandler got java.lang.ArithmeticException"
+        "it never finishes after printing: Second throws an exception",
+        "Second throws an exception\nCoroutineExceptionHandler got java.lang.ArithmeticException\nFirst finished",
+        "Second throws an exception\nFirst finished\nCoroutineExceptionHandler got java.lang.ArithmeticException"
       ],
       "correctAnswerNumber": 3,
       "explanation": "If a coroutine encounters an exception other than CancellationException, it cancels its parent with that exception. This behaviour cannot be overridden and is used to provide stable coroutines hierarchies for structured concurrency. CoroutineExceptionHandler implementation is not used for child coroutines.The original exception is handled by the parent only when all its children terminate.",
@@ -154,9 +170,9 @@
       ]
     },
     {
-      "id": 10,
+      "id": 11,
       "title": "What will be the output when you run this code ?",
-      "code": "fun main() = runBlocking {\n    val handler = CoroutineExceptionHandler { _, exception ->\n        println(\"CoroutineExceptionHandler got $exception with suppressed ${exception.suppressed.contentToString()}\")\n    }\n    val job = GlobalScope.launch(handler) {\n        launch {\n            try {\n                delay(Long.MAX_VALUE)\n            } finally {\n                throw ArithmeticException()\n            }\n        }\n        launch {\n            delay(100)\n            throw IOException()\n        }\n        delay(Long.MAX_VALUE)\n    }\n    job.join()\n}",
+      "code": "fun main() = runBlocking {\n    val handler = createHandler()\n    val job = GlobalScope.launch(handler) {\n        launch {\n            try {\n                delay(Long.MAX_VALUE)\n            } finally {\n                throw ArithmeticException()\n            }\n        }\n        launch {\n            delay(100)\n            throw IOException()\n        }\n        delay(Long.MAX_VALUE)\n    }\n    job.join()\n}\n\nfun createHandler() =\n    CoroutineExceptionHandler { _, exception ->\n        println(\"CoroutineExceptionHandler got $exception with suppressed ${exception.suppressed.contentToString()}\")\n    }",
       "answers": [
         "Compilation error",
         "CoroutineExceptionHandler got java.io.IOException",
@@ -170,29 +186,29 @@
       ]
     },
     {
-      "id": 11,
+      "id": 12,
       "title": "What will be the output when you run this code ?",
-      "code": "fun main() = runBlocking {\n    coroutineScope {\n        val child1 = launch {\n            try {\n                println(\"The first child is sleeping\")\n                delay(Long.MAX_VALUE)\n            } finally {\n                println(\"The first child is cancelled\")\n            }\n        }\n        yield()\n\n        val child2 = launch {\n            println(\"Throwing an exception from the second child\")\n            throw IllegalArgumentException()\n        }\n        yield()\n        delay(2000)\n        println(\"canceling first child\")\n        child1.cancel()\n    }\n}",
+      "code": "fun main() = runBlocking {\n    coroutineScope {\n        val child1 = launch {\n            try {\n                println(\"The first child is sleeping\")\n                delay(Long.MAX_VALUE)\n            } finally {\n                println(\"The first child is cancelled\")\n            }\n        }\n        yield()\n\n        val child2 = launch {\n            println(\"throwing an exception from the second child\")\n            throw IllegalArgumentException()\n        }\n        yield()\n        delay(2000)\n        println(\"canceling first child\")\n        child1.cancel()\n    }\n}",
       "answers": [
         "Compilation error",
-        "The first child is sleeping\nThrowing an exception from the second child\nThe first child is cancelled\nException in thread \"main\" java.lang.IllegalArgumentException",
-        "The first child is sleeping\nThrowing an exception from the second child\nException in thread \"main\" java.lang.IllegalArgumentException\ncanceling first child\nThe first child is cancelled",
+        "The first child is sleeping\nthrowing an exception from the second child\nThe first child is cancelled\nException in thread \"main\" java.lang.IllegalArgumentException",
+        "The first child is sleeping\nthrowing an exception from the second child\nException in thread \"main\" java.lang.IllegalArgumentException\ncanceling first child\nThe first child is cancelled",
         "nothing"
       ],
       "correctAnswerNumber": 1,
-      "explanation": "Cancellation is a bidirectional relationship propagating through the whole hierarchy of coroutines. Here, the first child will throw an IllegalArgumentException and gets canceled, which cancels it's parent, the coroutineScope, which cancels it's other child, the second child.",
+      "explanation": "Cancellation is a bidirectional relationship propagating through the whole hierarchy of coroutines. Here, the second child will throw an IllegalArgumentException and gets canceled, which cancels it's parent, the coroutineScope, which cancels it's other child, the first child.",
       "tags": [
         "exceptions"
       ]
     },
     {
-      "id": 12,
+      "id": 13,
       "title": "What will be the output when you run this code ?",
-      "code": "fun main() = runBlocking {\n    supervisorScope {\n        val child1 = launch {\n            try {\n                println(\"The first child is sleeping\")\n                delay(Long.MAX_VALUE)\n            } finally {\n                println(\"The first child is cancelled\")\n            }\n        }\n        yield()\n\n        val child2 = launch {\n            println(\"Throwing an exception from the second child\")\n            throw IllegalArgumentException()\n        }\n        yield()\n        delay(2000)\n        println(\"canceling first child\")\n        child1.cancel()\n    }\n}",
+      "code": "fun main() = runBlocking {\n    supervisorScope {\n        val child1 = launch {\n            try {\n                println(\"The first child is sleeping\")\n                delay(Long.MAX_VALUE)\n            } finally {\n                println(\"The first child is cancelled\")\n            }\n        }\n        yield()\n\n        val child2 = launch {\n            println(\"throwing an exception from the second child\")\n            throw IllegalArgumentException()\n        }\n        yield()\n        delay(2000)\n        println(\"canceling first child\")\n        child1.cancel()\n    }\n}",
       "answers": [
         "Compilation error",
-        "The first child is sleeping\nThrowing an exception from the second child\nThe first child is cancelled\nException in thread \"main\" java.lang.IllegalArgumentException",
-        "The first child is sleeping\nThrowing an exception from the second child\nException in thread \"main\" java.lang.IllegalArgumentException\ncanceling first child\nThe first child is cancelled",
+        "The first child is sleeping\nthrowing an exception from the second child\nThe first child is cancelled\nException in thread \"main\" java.lang.IllegalArgumentException",
+        "The first child is sleeping\nthrowing an exception from the second child\nException in thread \"main\" java.lang.IllegalArgumentException\ncanceling first child\nThe first child is cancelled",
         "nothing"
       ],
       "correctAnswerNumber": 2,
@@ -202,23 +218,23 @@
       ]
     },
     {
-      "id": 13,
+      "id": 14,
       "title": "What will be the output when you run this code ?",
-      "code": "fun main() = runBlocking {\n    val handler = CoroutineExceptionHandler { _, exception ->\n        println(\"CoroutineExceptionHandler got $exception\")\n    }\n    supervisorScope {\n        val child = launch(handler) {\n            println(\"The child throws an exception\")\n            throw AssertionError()\n        }\n        println(\"The scope is completing\")\n    }\n    println(\"The scope is completed\")\n}",
+      "code": "fun main() = runBlocking {\n    val handler = createHandler()\n    supervisorScope {\n        launch(handler) {\n            println(\"Throwing exception\")\n            throw AssertionError()\n        }\n        println(\"The scope is completing\")\n    }\n    println(\"The scope is completed\")\n}\n\nfun createHandler() =\n    CoroutineExceptionHandler { _, exception ->\n        println(\"CoroutineExceptionHandler got $exception\")\n    }",
       "answers": [
         "Compilation error",
-        "The scope is completing\nThe child throws an exception\nCoroutineExceptionHandler got java.lang.AssertionError\nThe scope is completed",
-        "The scope is completing\nThe child throws an exception\nThe scope is completed\nException in thread \"main\" java.lang.AssertionError",
-        "The scope is completing\nThe child throws an exception\nException in thread \"main\" java.lang.AssertionError"
+        "The scope is completing\nThrowing exception\nCoroutineExceptionHandler got java.lang.AssertionError\nThe scope is completed",
+        "The scope is completing\nThrowing exception\nThe scope is completed\nException in thread \"main\" java.lang.AssertionError",
+        "The scope is completing\nThrowing exception\nException in thread  \"main\" java.lang.AssertionError"
       ],
       "correctAnswerNumber": 1,
-      "explanation": "Another crucial difference between regular and supervisor jobs is exception handling. Every child should handle its exceptions by itself via the exception handling mechanism. This difference comes from the fact that child's failure does not propagate to the parent. It means that coroutines launched directly inside the supervisorScope do use the CoroutineExceptionHandler that is installed in their scope in the same way as root coroutines do.",
+      "explanation": "Another crucial difference between regular and supervisor jobs is exception handling. Every child should handle its exceptions by itself via the exception handling mechanism. This difference comes from the fact that child's failure does not propagate to the parent. It means that coroutines launched directly inside the supervisorScope do use the CoroutineExceptionHandler that is installed in their scope in the same way as root coroutines do.\n If there would be coroutineScope{} instead of supervisorScope, there will be an unhandled Exception in the log.",
       "tags": [
         "exceptions"
       ]
     },
     {
-      "id": 14,
+      "id": 15,
       "title": "What will be the output when you run this code ?",
       "code": "fun main() = runBlocking {\n\n    val scope = CoroutineScope(SupervisorJob()).launch {\n        println(\"parent\")\n\n        launch {\n            throw IOException()\n        }\n\n        delay(100)\n        println(\"finished\")\n    }\n\n    delay(500)\n    scope.cancel()\n}",
       "answers": [
@@ -233,7 +249,7 @@
       ]
     },
     {
-      "id": 15,
+      "id": 16,
       "title": "What will be the output when you run this code ?",
       "code": "fun main() = runBlocking {\n\n    val scope = CoroutineScope(SupervisorJob()).launch {\n        println(\"parent\")\n\n        launch(SupervisorJob(coroutineContext.job)) {\n            throw IOException()\n        }\n\n        delay(100)\n        println(\"finished\")\n    }\n\n    delay(500)\n    scope.cancel()\n}",
       "answers": [
