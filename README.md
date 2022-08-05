@@ -20,7 +20,7 @@ If you have an interesting piece of code, a better explanation, a topic which is
 <img src="/screenshots/screenshot_1.png" width="260">&emsp;<img src="/screenshots/screenshot_2.png" width="260">
 
 ## :pushpin: Possible enhancments
-- code highlight 
+- <del>code highlight</del> 
 - better ui
 - save progress
 - more questions, more topics
