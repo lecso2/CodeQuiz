@@ -36,7 +36,7 @@ class PuzzleFragment : Fragment() {
         val puzzle = ProgressStore.getPuzzle()
 
         binding.title.text = puzzle.title
-        binding.code.text = puzzle.code
+        binding.code.bindSyntaxHighlighter(formattedSourceCode = puzzle.code)
 //        binding.explanationTitle.setOnClickListener { toggleExplanation(puzzle.explanation) }
         binding.explanationBody.text = puzzle.explanation
         addButtons(puzzle.id, puzzle.answers, puzzle.correctAnswerNumber)
@@ -94,7 +94,7 @@ class PuzzleFragment : Fragment() {
             rButton.text = "$s"
             rButton.setTextColor(resources.getColor(R.color.secondary))
             val typeface = ResourcesCompat.getFont(requireContext(), R.font.poppins_medium)
-            rButton.typeface= typeface
+            rButton.typeface = typeface
             rButton.setOnClickListener { onAnswerClick(puzzleId, correctAnswerNumber, index) }
             val params = RadioGroup.LayoutParams(
                 ViewGroup.LayoutParams.WRAP_CONTENT,
